@@ -1,27 +1,27 @@
 import { useState, useEffect } from 'react';
-import { Shield, Activity, TestTube, BarChart3, Info } from 'lucide-react';
+import { Shield, Activity, TestTube, BarChart3, Info, Presentation } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import Dashboard from './components/Dashboard/Dashboard';
 import SimulationLab from './components/SimulationLab/SimulationLab';
 import MitigationCenter from './components/MitigationCenter/MitigationCenter';
 import Analytics from './components/Analytics/Analytics';
 import About from './components/About/About';
+import DemoScenarios from './components/DemoScenarios';
 
-type Tab = 'dashboard' | 'simulation' | 'mitigation' | 'analytics' | 'about';
+type Tab = 'dashboard' | 'demo' | 'simulation' | 'mitigation' | 'analytics' | 'about';
 
 function App() {
-  // Load saved tab from localStorage or default to dashboard
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     const saved = localStorage.getItem('activeTab');
-    return (saved as Tab) || 'dashboard';
+    return (saved as Tab) || 'demo';
   });
 
-  // Save active tab to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
   }, [activeTab]);
 
   const tabs = [
+    { id: 'demo' as Tab, label: '🎯 Demo Scenarios', icon: Presentation },
     { id: 'dashboard' as Tab, label: 'Dashboard', icon: Activity },
     { id: 'simulation' as Tab, label: 'Simulation Lab', icon: TestTube },
     { id: 'mitigation' as Tab, label: 'Mitigation Center', icon: Shield },
@@ -31,7 +31,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-cyber-darker">
-      {/* Toast Notifications */}
       <Toaster
         position="top-right"
         toastOptions={{
@@ -55,6 +54,7 @@ function App() {
           },
         }}
       />
+
       {/* Header */}
       <header className="glass border-b border-white/10 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
@@ -81,7 +81,7 @@ function App() {
       {/* Navigation Tabs */}
       <nav className="glass border-b border-white/10">
         <div className="container mx-auto px-6">
-          <div className="flex space-x-1">
+          <div className="flex space-x-1 overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -89,7 +89,7 @@ function App() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex items-center space-x-2 px-6 py-4 transition-all duration-300
+                    flex items-center space-x-2 px-6 py-4 transition-all duration-300 whitespace-nowrap
                     ${activeTab === tab.id 
                       ? 'bg-cyber-blue/20 text-cyber-blue border-b-2 border-cyber-blue' 
                       : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -107,6 +107,7 @@ function App() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
+        {activeTab === 'demo' && <DemoScenarios />}
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'simulation' && <SimulationLab />}
         {activeTab === 'mitigation' && <MitigationCenter />}

@@ -14,7 +14,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
     targetDomain: 'example.com',
     spoofedIP: '192.168.1.100',
     intensity: 'medium',
-    duration: 60,
+    duration: 60, // Default 60 seconds
   });
 
   const attackTypes: { value: AttackType; label: string; description: string }[] = [
@@ -41,6 +41,15 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
   ];
 
   const handleStart = () => {
+    // Validate duration before sending
+    if (config.duration < 10) {
+      alert('Duration must be at least 10 seconds');
+      return;
+    }
+    if (config.duration > 300) {
+      alert('Duration cannot exceed 300 seconds (5 minutes)');
+      return;
+    }
     onStart(config);
   };
 
@@ -64,9 +73,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
       <div className="space-y-6">
         {/* Attack Type Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-3">
-            Attack Type
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-3">Attack Type</label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {attackTypes.map((type) => (
               <button
@@ -75,9 +82,10 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
                 disabled={isRunning}
                 className={`
                   text-left p-4 rounded-lg border-2 transition-all duration-300
-                  ${config.type === type.value
-                    ? 'border-cyber-blue bg-cyber-blue/10 glow-blue'
-                    : 'border-white/10 bg-white/5 hover:border-cyber-blue/50'
+                  ${
+                    config.type === type.value
+                      ? 'border-cyber-blue bg-cyber-blue/10 glow-blue'
+                      : 'border-white/10 bg-white/5 hover:border-cyber-blue/50'
                   }
                   ${isRunning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                 `}
@@ -92,9 +100,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
         {/* Target Configuration */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Target Domain
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Target Domain</label>
             <input
               type="text"
               value={config.targetDomain}
@@ -134,9 +140,10 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
                   disabled={isRunning}
                   className={`
                     flex-1 py-3 rounded-lg font-medium transition-all duration-300
-                    ${config.intensity === level
-                      ? 'bg-cyber-blue text-white glow-blue'
-                      : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                    ${
+                      config.intensity === level
+                        ? 'bg-cyber-blue text-white glow-blue'
+                        : 'bg-white/5 text-gray-400 hover:bg-white/10'
                     }
                     ${isRunning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                   `}
@@ -149,17 +156,49 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Duration (seconds)
+              Duration: {config.duration} seconds
             </label>
-            <input
-              type="number"
-              value={config.duration}
-              onChange={(e) => setConfig({ ...config, duration: parseInt(e.target.value) })}
-              disabled={isRunning}
-              min="10"
-              max="300"
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-cyber-blue focus:outline-none transition-colors disabled:opacity-50"
-            />
+            <div className="space-y-2">
+              <input
+                type="range"
+                value={config.duration}
+                onChange={(e) => setConfig({ ...config, duration: parseInt(e.target.value) })}
+                disabled={isRunning}
+                min="10"
+                max="300"
+                step="10"
+                className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-cyber-blue disabled:opacity-50"
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>10s (min)</span>
+                <span>300s (max)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Duration Presets */}
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Quick Presets</label>
+          <div className="flex space-x-2">
+            {[30, 60, 120, 180].map((seconds) => (
+              <button
+                key={seconds}
+                onClick={() => setConfig({ ...config, duration: seconds })}
+                disabled={isRunning}
+                className={`
+                  px-4 py-2 rounded-lg text-sm transition-all duration-300
+                  ${
+                    config.duration === seconds
+                      ? 'bg-cyber-purple text-white'
+                      : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                  }
+                  ${isRunning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                `}
+              >
+                {seconds}s
+              </button>
+            ))}
           </div>
         </div>
 
@@ -185,12 +224,24 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
           )}
         </div>
 
-        {/* Warning */}
-        <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-          <p className="text-sm text-yellow-200">
-            ⚠️ This is a simulated attack in a controlled environment. 
-            No real networks or systems will be affected.
-          </p>
+        {/* Info Messages */}
+        <div className="space-y-2">
+          {/* Warning */}
+          <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+            <p className="text-sm text-yellow-200">
+              ⚠️ This is a simulated attack in a controlled environment. No real networks or
+              systems will be affected.
+            </p>
+          </div>
+
+          {/* Duration Warning */}
+          {config.duration < 10 && (
+            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-sm text-red-200">
+                ❌ Duration must be at least 10 seconds (currently {config.duration}s)
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

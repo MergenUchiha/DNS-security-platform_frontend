@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import AttackConfigurator from './AttackConfigurator';
-import SimulationVisualizer from './SimulationVisualizer';
+import EpicSimulationVisualizer from './EpicSimulationVisualizer';
 import type { AttackConfig, SimulationResult } from '../../types';
 import { simulationAPI } from '../../services/api';
 import websocketService from '../../services/websocket';
@@ -12,14 +12,11 @@ const SimulationLab = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Connect to WebSocket
     websocketService.connect();
 
-    // Listen for simulation updates
     const handleSimulationUpdate = (data: SimulationResult) => {
       console.log('📡 Simulation update received:', data);
       
-      // Ensure metrics exist with fallback
       const updatedData = {
         ...data,
         metrics: data.metrics || {
@@ -33,20 +30,18 @@ const SimulationLab = () => {
       setSimulation(updatedData);
       setIsRunning(data.status === 'running');
       
-      // Clear simulation after completion
       if (data.status === 'completed' || data.status === 'stopped') {
         console.log('✅ Simulation finished, will clear in 5 seconds');
         setTimeout(() => {
           console.log('🧹 Clearing simulation state');
           setSimulation(null);
           setIsRunning(false);
-        }, 5000); // Show final state for 5 seconds
+        }, 5000);
       }
     };
 
     websocketService.onSimulationUpdate(handleSimulationUpdate);
 
-    // Cleanup on unmount
     return () => {
       websocketService.offSimulationUpdate(handleSimulationUpdate);
     };
@@ -58,14 +53,13 @@ const SimulationLab = () => {
       setIsRunning(true);
       
       console.log('🚀 Starting simulation with config:', config);
-      toast.loading('Starting attack simulation...', { id: 'simulation' });
+      toast.loading('Initializing attack simulation...', { id: 'simulation' });
       
       const result = await simulationAPI.start(config);
       
       console.log('✅ Simulation started:', result);
-      toast.success('Attack simulation started successfully!', { id: 'simulation' });
+      toast.success('Attack simulation launched successfully!', { id: 'simulation' });
       
-      // Ensure metrics exist
       const simulationWithMetrics = {
         ...result,
         metrics: result.metrics || {
@@ -78,7 +72,6 @@ const SimulationLab = () => {
       
       setSimulation(simulationWithMetrics);
 
-      // Auto-stop after duration
       setTimeout(async () => {
         if (result.id) {
           await handleStop(result.id);
@@ -122,7 +115,7 @@ const SimulationLab = () => {
       {/* Header */}
       <div>
         <h2 className="text-3xl font-bold text-gradient mb-2">Simulation Laboratory</h2>
-        <p className="text-gray-400">Configure and execute controlled DNS spoofing attacks</p>
+        <p className="text-gray-400">Configure and execute controlled DNS spoofing attacks with real-time visualization</p>
       </div>
 
       {/* Error Message */}
@@ -142,8 +135,8 @@ const SimulationLab = () => {
         isRunning={isRunning} 
       />
 
-      {/* Visualization */}
-      <SimulationVisualizer simulation={simulation} />
+      {/* Epic Visualization */}
+      <EpicSimulationVisualizer simulation={simulation} />
     </div>
   );
 };

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Target, Server, Wifi, AlertCircle } from 'lucide-react';
 import type { SimulationResult } from '../../types';
@@ -7,6 +8,38 @@ interface Props {
 }
 
 const SimulationVisualizer = ({ simulation }: Props) => {
+  const [progress, setProgress] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (!simulation || simulation.status !== 'running') {
+      return;
+    }
+
+    const startTime =
+      typeof simulation.startTime === 'string'
+        ? new Date(simulation.startTime).getTime()
+        : simulation.startTime;
+
+    const duration = (simulation.config?.duration || simulation.duration || 60) * 1000;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const elapsedMs = now - startTime;
+      const elapsedSec = Math.floor(elapsedMs / 1000);
+      const currentProgress = Math.min((elapsedMs / duration) * 100, 100);
+
+      setElapsed(elapsedSec);
+      setProgress(currentProgress);
+
+      if (currentProgress >= 100) {
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [simulation]);
+
   if (!simulation) {
     return (
       <div className="glass rounded-xl p-12 text-center">
@@ -19,7 +52,6 @@ const SimulationVisualizer = ({ simulation }: Props) => {
     );
   }
 
-  // Safely get config values with fallbacks
   const config = simulation.config || {
     type: simulation.attackType,
     targetDomain: simulation.targetDomain,
@@ -28,26 +60,32 @@ const SimulationVisualizer = ({ simulation }: Props) => {
     duration: simulation.duration,
   };
 
-  const startTime = typeof simulation.startTime === 'string' 
-    ? new Date(simulation.startTime).getTime() 
-    : simulation.startTime;
-
-  const progress = simulation.status === 'running' 
-    ? ((Date.now() - startTime) / ((config.duration || 60) * 1000)) * 100
-    : 100;
+  const duration = config.duration || 60;
+  const remaining = Math.max(0, duration - elapsed);
 
   return (
     <div className="glass rounded-xl p-6">
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-semibold text-white">Attack Visualization</h3>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            simulation.status === 'running' 
-              ? 'bg-cyber-pink/20 text-cyber-pink' 
-              : 'bg-cyber-green/20 text-cyber-green'
-          }`}>
-            {simulation.status.toUpperCase()}
-          </span>
+          <div className="flex items-center space-x-3">
+            <span
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                simulation.status === 'running'
+                  ? 'bg-cyber-pink/20 text-cyber-pink'
+                  : simulation.status === 'completed'
+                  ? 'bg-cyber-green/20 text-cyber-green'
+                  : 'bg-gray-500/20 text-gray-400'
+              }`}
+            >
+              {simulation.status.toUpperCase()}
+            </span>
+            {simulation.status === 'running' && (
+              <span className="text-sm text-gray-400">
+                {elapsed}s / {duration}s ({remaining}s remaining)
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Progress Bar */}
@@ -56,12 +94,12 @@ const SimulationVisualizer = ({ simulation }: Props) => {
             className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyber-pink to-cyber-purple"
             initial={{ width: 0 }}
             animate={{ width: `${Math.min(progress, 100)}%` }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }}
           />
         </div>
         <div className="flex justify-between text-xs text-gray-400 mt-2">
           <span>Progress: {Math.min(progress, 100).toFixed(1)}%</span>
-          <span>{config.duration || 60}s duration</span>
+          <span>{duration}s total duration</span>
         </div>
       </div>
 
@@ -119,7 +157,11 @@ const SimulationVisualizer = ({ simulation }: Props) => {
               className="h-1 bg-gradient-to-r from-cyber-purple to-cyber-green"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: simulation.status === 'running' ? 1 : 0 }}
-              transition={{ duration: 1, repeat: simulation.status === 'running' ? Infinity : 0, delay: 0.5 }}
+              transition={{
+                duration: 1,
+                repeat: simulation.status === 'running' ? Infinity : 0,
+                delay: 0.5,
+              }}
               style={{ originX: 0 }}
             />
           </div>

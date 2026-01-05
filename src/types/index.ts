@@ -77,6 +77,9 @@ export interface SecurityMetrics {
   dnssecValidations: number;
   avgResponseTime: number;
   uptime: number;
+  totalQueries: number;
+  maliciousQueries: number;
+  legitimateQueries: number;
 }
 
 // Analytics Types

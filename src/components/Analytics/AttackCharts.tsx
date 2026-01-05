@@ -1,30 +1,84 @@
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
+import type { AttackStatistics } from '../../types';
 
-const AttackCharts = () => {
-  // Sample data for attacks over time
-  const timelineData = [
-    { date: 'Mon', total: 45, blocked: 38, successful: 7 },
-    { date: 'Tue', total: 62, blocked: 54, successful: 8 },
-    { date: 'Wed', total: 58, blocked: 51, successful: 7 },
-    { date: 'Thu', total: 71, blocked: 65, successful: 6 },
-    { date: 'Fri', total: 53, blocked: 48, successful: 5 },
-    { date: 'Sat', total: 39, blocked: 36, successful: 3 },
-    { date: 'Sun', total: 42, blocked: 39, successful: 3 },
-  ];
+interface Props {
+  statistics: AttackStatistics[];
+}
 
-  // Attack types distribution
+const AttackCharts = ({ statistics }: Props) => {
+  // Transform data for timeline chart
+  const timelineData = statistics.map((stat) => ({
+    date: new Date(stat.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    total: stat.total,
+    blocked: stat.blocked,
+    successful: stat.successful,
+  }));
+
+  // Calculate total attack types
+  const totalAttackTypes = statistics.reduce(
+    (acc, stat) => {
+      Object.keys(stat.attackTypes).forEach((key) => {
+        const attackKey = key as keyof typeof stat.attackTypes;
+        acc[attackKey] = (acc[attackKey] || 0) + stat.attackTypes[attackKey];
+      });
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
   const attackTypesData = [
-    { name: 'Cache Poisoning', value: 45, color: '#00d9ff' },
-    { name: 'MITM', value: 30, color: '#b537f2' },
-    { name: 'DNS Hijack', value: 15, color: '#ff2e97' },
-    { name: 'Rogue Server', value: 10, color: '#00ff88' },
-  ];
+    {
+      name: 'Cache Poisoning',
+      value: totalAttackTypes.dns_cache_poisoning || 0,
+      color: '#00d9ff',
+    },
+    {
+      name: 'MITM',
+      value: totalAttackTypes.man_in_the_middle || 0,
+      color: '#b537f2',
+    },
+    {
+      name: 'DNS Hijack',
+      value: totalAttackTypes.local_dns_hijack || 0,
+      color: '#ff2e97',
+    },
+    {
+      name: 'Rogue Server',
+      value: totalAttackTypes.rogue_dns_server || 0,
+      color: '#00ff88',
+    },
+  ].filter((item) => item.value > 0);
+
+  if (statistics.length === 0) {
+    return (
+      <div className="glass rounded-xl p-12 text-center">
+        <p className="text-gray-400">No analytics data available</p>
+        <p className="text-sm text-gray-500 mt-2">Run some simulations to generate data</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Attack Timeline */}
       <div className="glass rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-white mb-6">Attack Timeline - Last 7 Days</h3>
+        <h3 className="text-lg font-semibold text-white mb-6">
+          Attack Timeline - Last {statistics.length} Days
+        </h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={timelineData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
@@ -70,31 +124,37 @@ const AttackCharts = () => {
         {/* Attack Types Distribution */}
         <div className="glass rounded-xl p-6">
           <h3 className="text-lg font-semibold text-white mb-6">Attack Types Distribution</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={attackTypesData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {attackTypesData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#0a0e27',
-                  border: '1px solid #ffffff20',
-                  borderRadius: '8px',
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          {attackTypesData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={attackTypesData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {attackTypesData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#0a0e27',
+                    border: '1px solid #ffffff20',
+                    borderRadius: '8px',
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-gray-500">
+              No attack type data
+            </div>
+          )}
         </div>
 
         {/* Success vs Blocked */}

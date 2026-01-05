@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Shield, CheckCircle, XCircle, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import type { MitigationConfig } from '../../types';
 
 interface Props {
@@ -7,18 +9,39 @@ interface Props {
   onUpdate: (updates: Partial<MitigationConfig>) => void;
 }
 
+interface ValidationResult {
+  domain: string;
+  status: 'valid' | 'invalid';
+  timestamp: number;
+}
+
 const DNSSECValidator = ({ config, onUpdate }: Props) => {
+  const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const enabled = config?.dnssecEnabled ?? true;
 
-  const toggleDNSSEC = () => {
-    onUpdate({ dnssecEnabled: !enabled });
+  const toggleDNSSEC = async () => {
+    const newState = !enabled;
+    try {
+      await onUpdate({ dnssecEnabled: newState });
+      toast.success(`DNSSEC ${newState ? 'enabled' : 'disabled'} successfully`);
+    } catch (error) {
+      toast.error('Failed to update DNSSEC setting');
+    }
   };
 
-  const validationResults = [
-    { domain: 'cloudflare.com', status: 'valid', timestamp: Date.now() - 5000 },
-    { domain: 'google.com', status: 'valid', timestamp: Date.now() - 15000 },
-    { domain: 'malicious-site.com', status: 'invalid', timestamp: Date.now() - 25000 },
-  ];
+  // Simulate validation results (in real app, these would come from backend)
+  useEffect(() => {
+    if (!enabled) {
+      setValidationResults([]);
+      return;
+    }
+
+    // Initial mock data
+    setValidationResults([
+      { domain: 'cloudflare.com', status: 'valid', timestamp: Date.now() - 5000 },
+      { domain: 'google.com', status: 'valid', timestamp: Date.now() - 15000 },
+    ]);
+  }, [enabled]);
 
   return (
     <div className="glass rounded-xl p-6">
@@ -33,7 +56,6 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
           </div>
         </div>
 
-        {/* Toggle Switch */}
         <button
           onClick={toggleDNSSEC}
           className={`
@@ -49,14 +71,16 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
         </button>
       </div>
 
-      {/* Status Card */}
-      <div className={`
+      <div
+        className={`
         p-4 rounded-lg mb-6 border-2 transition-all duration-300
-        ${enabled 
-          ? 'bg-cyber-green/10 border-cyber-green/30' 
-          : 'bg-gray-700/10 border-gray-700/30'
+        ${
+          enabled
+            ? 'bg-cyber-green/10 border-cyber-green/30'
+            : 'bg-gray-700/10 border-gray-700/30'
         }
-      `}>
+      `}
+      >
         <div className="flex items-center space-x-3">
           {enabled ? (
             <>
@@ -82,7 +106,6 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
         </div>
       </div>
 
-      {/* Info Box */}
       <div className="p-4 bg-cyber-blue/10 border border-cyber-blue/30 rounded-lg mb-6">
         <div className="flex items-start space-x-3">
           <Info className="w-5 h-5 text-cyber-blue flex-shrink-0 mt-0.5" />
@@ -97,43 +120,56 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
         </div>
       </div>
 
-      {/* Recent Validations */}
       <div>
-        <h4 className="text-sm font-medium text-white mb-3">Recent Validations</h4>
-        <div className="space-y-2">
-          {validationResults.map((result, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10"
-            >
-              <div className="flex items-center space-x-3">
-                {result.status === 'valid' ? (
-                  <CheckCircle className="w-5 h-5 text-cyber-green" />
-                ) : (
-                  <XCircle className="w-5 h-5 text-cyber-pink" />
-                )}
-                <div>
-                  <p className="text-sm font-mono text-white">{result.domain}</p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(result.timestamp).toLocaleTimeString()}
-                  </p>
+        <h4 className="text-sm font-medium text-white mb-3">
+          Recent Validations ({validationResults.length})
+        </h4>
+        {validationResults.length > 0 ? (
+          <div className="space-y-2">
+            {validationResults.map((result, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10"
+              >
+                <div className="flex items-center space-x-3">
+                  {result.status === 'valid' ? (
+                    <CheckCircle className="w-5 h-5 text-cyber-green" />
+                  ) : (
+                    <XCircle className="w-5 h-5 text-cyber-pink" />
+                  )}
+                  <div>
+                    <p className="text-sm font-mono text-white">{result.domain}</p>
+                    <p className="text-xs text-gray-400">
+                      {new Date(result.timestamp).toLocaleTimeString()}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <span className={`
-                px-2 py-1 rounded text-xs font-medium
-                ${result.status === 'valid' 
-                  ? 'bg-cyber-green/20 text-cyber-green' 
-                  : 'bg-cyber-pink/20 text-cyber-pink'
-                }
-              `}>
-                {result.status.toUpperCase()}
-              </span>
-            </motion.div>
-          ))}
-        </div>
+                <span
+                  className={`
+                  px-2 py-1 rounded text-xs font-medium
+                  ${
+                    result.status === 'valid'
+                      ? 'bg-cyber-green/20 text-cyber-green'
+                      : 'bg-cyber-pink/20 text-cyber-pink'
+                  }
+                `}
+                >
+                  {result.status.toUpperCase()}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <Shield className="w-10 h-10 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">
+              {enabled ? 'No validations yet' : 'Enable DNSSEC to see validations'}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

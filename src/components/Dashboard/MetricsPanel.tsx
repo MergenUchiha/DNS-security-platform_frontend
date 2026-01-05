@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Shield, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import type { SecurityMetrics } from '../../types';
 
-interface Metric {
+interface Props {
+  metrics: SecurityMetrics | null;
+}
+
+interface DisplayMetric {
   label: string;
   value: string | number;
   change: number;
@@ -11,77 +16,67 @@ interface Metric {
   glowColor: string;
 }
 
-const MetricsPanel = () => {
-  const [metrics, setMetrics] = useState<Metric[]>([
+const MetricsPanel = ({ metrics }: Props) => {
+  const [previousMetrics, setPreviousMetrics] = useState<SecurityMetrics | null>(null);
+
+  useEffect(() => {
+    if (metrics && previousMetrics) {
+      // Metrics updated, previous values stored for change calculation
+    }
+    if (metrics) {
+      setPreviousMetrics(metrics);
+    }
+  }, [metrics]);
+
+  const calculateChange = (current: number, previous: number): number => {
+    if (previous === 0) return 0;
+    return ((current - previous) / previous) * 100;
+  };
+
+  const displayMetrics: DisplayMetric[] = [
     {
       label: 'Total Queries',
-      value: 0,
-      change: 0,
+      value: metrics?.totalQueries || 0,
+      change: previousMetrics
+        ? calculateChange(metrics?.totalQueries || 0, previousMetrics.totalQueries)
+        : 0,
       icon: Activity,
       color: 'text-cyber-blue',
       glowColor: 'glow-blue',
     },
     {
       label: 'Threats Detected',
-      value: 0,
-      change: 0,
+      value: metrics?.threatsDetected || 0,
+      change: previousMetrics
+        ? calculateChange(metrics?.threatsDetected || 0, previousMetrics.threatsDetected)
+        : 0,
       icon: AlertTriangle,
       color: 'text-cyber-pink',
       glowColor: 'glow-purple',
     },
     {
       label: 'Threats Blocked',
-      value: 0,
-      change: 0,
+      value: metrics?.threatsBlocked || 0,
+      change: previousMetrics
+        ? calculateChange(metrics?.threatsBlocked || 0, previousMetrics.threatsBlocked)
+        : 0,
       icon: Shield,
       color: 'text-cyber-green',
       glowColor: 'glow-green',
     },
     {
-      label: 'Success Rate',
-      value: '0%',
+      label: 'Uptime',
+      value: `${(metrics?.uptime || 100).toFixed(1)}%`,
       change: 0,
       icon: CheckCircle,
       color: 'text-cyber-purple',
       glowColor: 'glow-purple',
     },
-  ]);
-
-  // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMetrics((prev) =>
-        prev.map((metric, idx) => {
-          if (idx === 0) {
-            // Total Queries
-            const newValue = (metric.value as number) + Math.floor(Math.random() * 10);
-            return { ...metric, value: newValue, change: Math.random() * 5 };
-          } else if (idx === 1) {
-            // Threats Detected
-            const newValue = (metric.value as number) + (Math.random() > 0.7 ? 1 : 0);
-            return { ...metric, value: newValue, change: Math.random() * 3 };
-          } else if (idx === 2) {
-            // Threats Blocked
-            const detected = prev[1].value as number;
-            const newValue = Math.floor(detected * (0.8 + Math.random() * 0.2));
-            return { ...metric, value: newValue, change: Math.random() * 2 };
-          } else {
-            // Success Rate
-            const detected = prev[1].value as number;
-            const blocked = prev[2].value as number;
-            const rate = detected > 0 ? ((blocked / detected) * 100).toFixed(1) : '0.0';
-            return { ...metric, value: `${rate}%`, change: 0 };
-          }
-        })
-      );
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
+  ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {metrics.map((metric, idx) => {
+      {displayMetrics.map((metric, idx) => {
         const Icon = metric.icon;
         return (
           <motion.div
@@ -92,20 +87,29 @@ const MetricsPanel = () => {
             className={`glass rounded-xl p-6 ${metric.glowColor} hover:scale-105 transition-transform duration-300`}
           >
             <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-lg bg-gradient-to-br ${metric.color.replace('text-', 'from-')}/20 ${metric.color.replace('text-', 'to-')}/10`}>
+              <div
+                className={`p-3 rounded-lg bg-gradient-to-br ${metric.color.replace(
+                  'text-',
+                  'from-'
+                )}/20 ${metric.color.replace('text-', 'to-')}/10`}
+              >
                 <Icon className={`w-6 h-6 ${metric.color}`} />
               </div>
-              {metric.change > 0 && (
-                <div className="flex items-center space-x-1 text-xs text-cyber-green">
-                  <span>↑</span>
-                  <span>{metric.change.toFixed(1)}%</span>
+              {metric.change !== 0 && (
+                <div
+                  className={`flex items-center space-x-1 text-xs ${
+                    metric.change > 0 ? 'text-cyber-green' : 'text-cyber-pink'
+                  }`}
+                >
+                  <span>{metric.change > 0 ? '↑' : '↓'}</span>
+                  <span>{Math.abs(metric.change).toFixed(1)}%</span>
                 </div>
               )}
             </div>
             <div>
               <p className="text-gray-400 text-sm mb-1">{metric.label}</p>
               <motion.p
-                key={metric.value}
+                key={String(metric.value)}
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
                 className="text-3xl font-bold text-white"

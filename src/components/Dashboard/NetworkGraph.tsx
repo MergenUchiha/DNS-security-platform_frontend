@@ -1,27 +1,34 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import type { DNSQuery } from '../../types';
+
+interface Props {
+  queries: DNSQuery[];
+}
 
 interface NetworkNode {
   id: string;
   type: 'client' | 'dns' | 'server';
   position: THREE.Vector3;
   color: number;
+  mesh?: THREE.Mesh;
+  glow?: THREE.Mesh;
 }
 
-const NetworkGraph = () => {
+const NetworkGraph = ({ queries }: Props) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const nodesRef = useRef<NetworkNode[]>([]);
+  const particlesRef = useRef<THREE.Mesh[]>([]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Setup scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a0e27);
     sceneRef.current = scene;
 
-    // Setup camera
     const camera = new THREE.PerspectiveCamera(
       75,
       canvasRef.current.clientWidth / canvasRef.current.clientHeight,
@@ -30,7 +37,6 @@ const NetworkGraph = () => {
     );
     camera.position.z = 15;
 
-    // Setup renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(canvasRef.current.clientWidth, canvasRef.current.clientHeight);
     canvasRef.current.appendChild(renderer.domElement);
@@ -44,15 +50,12 @@ const NetworkGraph = () => {
       { id: 'server', type: 'server', position: new THREE.Vector3(8, 0, 0), color: 0x00ff88 },
     ];
 
-    const nodeObjects: THREE.Mesh[] = [];
-    
     nodes.forEach((node) => {
       const geometry = new THREE.SphereGeometry(0.5, 32, 32);
       const material = new THREE.MeshBasicMaterial({ color: node.color });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.position.copy(node.position);
-      
-      // Add glow effect
+
       const glowGeometry = new THREE.SphereGeometry(0.7, 32, 32);
       const glowMaterial = new THREE.MeshBasicMaterial({
         color: node.color,
@@ -61,17 +64,21 @@ const NetworkGraph = () => {
       });
       const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
       glowMesh.position.copy(node.position);
-      
+
       scene.add(mesh);
       scene.add(glowMesh);
-      nodeObjects.push(mesh);
+
+      node.mesh = mesh;
+      node.glow = glowMesh;
     });
 
+    nodesRef.current = nodes;
+
     // Create connections
-    const lineMaterial = new THREE.LineBasicMaterial({ 
-      color: 0x00d9ff, 
-      transparent: true, 
-      opacity: 0.3 
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x00d9ff,
+      transparent: true,
+      opacity: 0.3,
     });
 
     const connections = [
@@ -88,45 +95,21 @@ const NetworkGraph = () => {
       scene.add(line);
     });
 
-    // Create moving particles
-    const particles: THREE.Mesh[] = [];
-    const particleCount = 10;
-    
-    for (let i = 0; i < particleCount; i++) {
-      const particleGeometry = new THREE.SphereGeometry(0.1, 16, 16);
-      const particleMaterial = new THREE.MeshBasicMaterial({ 
-        color: Math.random() > 0.5 ? 0x00d9ff : 0xff2e97 
-      });
-      const particle = new THREE.Mesh(particleGeometry, particleMaterial);
-      
-      const randomConnection = connections[Math.floor(Math.random() * connections.length)];
-      particle.position.copy(randomConnection[0]);
-      particle.userData = {
-        start: randomConnection[0].clone(),
-        end: randomConnection[1].clone(),
-        progress: Math.random(),
-        speed: 0.005 + Math.random() * 0.01,
-      };
-      
-      scene.add(particle);
-      particles.push(particle);
-    }
-
     // Animation loop
     let animationId: number;
     const animate = () => {
       animationId = requestAnimationFrame(animate);
 
-      // Rotate nodes slightly
-      nodeObjects.forEach((node, i) => {
-        node.rotation.y += 0.01;
-        node.position.y += Math.sin(Date.now() * 0.001 + i) * 0.002;
+      nodes.forEach((node, i) => {
+        if (node.mesh) {
+          node.mesh.rotation.y += 0.01;
+          node.mesh.position.y = node.position.y + Math.sin(Date.now() * 0.001 + i) * 0.002;
+        }
       });
 
-      // Move particles
-      particles.forEach((particle) => {
+      particlesRef.current.forEach((particle) => {
         particle.userData.progress += particle.userData.speed;
-        
+
         if (particle.userData.progress > 1) {
           particle.userData.progress = 0;
           const randomConnection = connections[Math.floor(Math.random() * connections.length)];
@@ -146,7 +129,6 @@ const NetworkGraph = () => {
 
     animate();
 
-    // Handle resize
     const handleResize = () => {
       if (!canvasRef.current) return;
       camera.aspect = canvasRef.current.clientWidth / canvasRef.current.clientHeight;
@@ -162,6 +144,59 @@ const NetworkGraph = () => {
       renderer.dispose();
     };
   }, []);
+
+  // Create particles based on queries
+  useEffect(() => {
+    if (!sceneRef.current || queries.length === 0) return;
+
+    const scene = sceneRef.current;
+    const nodes = nodesRef.current;
+
+    // Create particle for latest query
+    const latestQuery = queries[0];
+    const particleGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+
+    let particleColor: number;
+    if (latestQuery.status === 'spoofed') {
+      particleColor = 0xff2e97;
+    } else if (latestQuery.status === 'blocked') {
+      particleColor = 0xb537f2;
+    } else {
+      particleColor = 0x00d9ff;
+    }
+
+    const particleMaterial = new THREE.MeshBasicMaterial({ color: particleColor });
+    const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+
+    const connections = [
+      [nodes[0].position, nodes[1].position],
+      [nodes[0].position, nodes[2].position],
+      [nodes[1].position, nodes[3].position],
+      [nodes[2].position, nodes[3].position],
+    ];
+
+    const randomConnection = connections[Math.floor(Math.random() * connections.length)];
+    particle.position.copy(randomConnection[0]);
+    particle.userData = {
+      start: randomConnection[0].clone(),
+      end: randomConnection[1].clone(),
+      progress: 0,
+      speed: 0.01,
+    };
+
+    scene.add(particle);
+    particlesRef.current.push(particle);
+
+    // Limit particle count
+    if (particlesRef.current.length > 15) {
+      const oldParticle = particlesRef.current.shift();
+      if (oldParticle) {
+        scene.remove(oldParticle);
+        oldParticle.geometry.dispose();
+        (oldParticle.material as THREE.Material).dispose();
+      }
+    }
+  }, [queries]);
 
   return (
     <div className="glass rounded-xl p-6 h-[500px]">
