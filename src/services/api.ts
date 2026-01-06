@@ -6,7 +6,6 @@ import type {
   SecurityMetrics,
   AttackStatistics 
 } from '../types';
-export { dnsMonitorAPI } from './dns-monitor-api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -150,6 +149,92 @@ export const analyticsAPI = {
       return data;
     } catch (error) {
       console.error('Failed to export report:', error);
+      throw error;
+    }
+  },
+};
+
+// DNS Monitor API (Hybrid Mode)
+export const dnsMonitorAPI = {
+  /**
+   * Start DNS monitoring for real traffic
+   */
+  start: async (domains?: string[]) => {
+    try {
+      const payload = domains && domains.length > 0 ? { domains } : { domains: [] };
+      const { data } = await api.post('/dns-monitor/start', payload);
+      console.log('✅ DNS monitoring started:', data);
+      return data;
+    } catch (error) {
+      console.error('Failed to start DNS monitoring:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Stop DNS monitoring
+   */
+  stop: async () => {
+    try {
+      const { data } = await api.post('/dns-monitor/stop');
+      console.log('✅ DNS monitoring stopped:', data);
+      return data;
+    } catch (error) {
+      console.error('Failed to stop DNS monitoring:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get current monitoring status
+   */
+  getStatus: async () => {
+    try {
+      const { data } = await api.get('/dns-monitor/status');
+      return data;
+    } catch (error) {
+      console.error('Failed to get DNS monitoring status:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get real traffic statistics
+   */
+  getStats: async () => {
+    try {
+      const { data } = await api.get('/dns-monitor/stats');
+      return data;
+    } catch (error) {
+      console.error('Failed to get DNS monitoring stats:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Add domain to monitoring list
+   */
+  addDomain: async (domain: string) => {
+    try {
+      const { data } = await api.post('/dns-monitor/domain', { domain });
+      console.log(`✅ Domain ${domain} added to monitoring`);
+      return data;
+    } catch (error) {
+      console.error(`Failed to add domain ${domain}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Remove domain from monitoring list
+   */
+  removeDomain: async (domain: string) => {
+    try {
+      const { data } = await api.delete(`/dns-monitor/domain/${domain}`);
+      console.log(`✅ Domain ${domain} removed from monitoring`);
+      return data;
+    } catch (error) {
+      console.error(`Failed to remove domain ${domain}:`, error);
       throw error;
     }
   },

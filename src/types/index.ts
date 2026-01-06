@@ -1,12 +1,14 @@
 // DNS Traffic Types
 export interface DNSQuery {
   id: string;
+  simulationId?: string | null; // null = Real traffic, UUID = Simulation
   timestamp: number;
   domain: string;
   queryType: 'A' | 'AAAA' | 'MX' | 'TXT' | 'NS';
   sourceIP: string;
   status: 'pending' | 'resolved' | 'spoofed' | 'blocked';
   responseIP?: string;
+  responseTime?: number; // milliseconds
   isSpoofed: boolean;
 }
 
@@ -47,7 +49,7 @@ export interface SimulationResult {
     successRate: number;
   };
   timeline?: TimelineEvent[];
-  queries?: any[];
+  queries?: DNSQuery[];
   events?: any[];
 }
 
@@ -98,3 +100,20 @@ export interface VulnerabilityScore {
   monitoring: number;
   configuration: number;
 }
+
+// Hybrid Mode Types
+export interface DNSMonitorStatus {
+  isMonitoring: boolean;
+  monitoredDomains: string[];
+  domainsCount: number;
+}
+
+export interface DNSMonitorStats {
+  totalQueries: number;
+  avgResponseTime: number;
+  spoofedQueries: number;
+  blockedQueries: number;
+  blockRate: number;
+}
+
+export type TrafficMode = 'simulation' | 'real' | 'both';

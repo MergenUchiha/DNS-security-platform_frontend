@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Activity, TestTube, BarChart3, Info, Presentation } from 'lucide-react';
+import { Shield, Activity, TestTube, BarChart3, Info, Presentation, Zap } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import Dashboard from './components/Dashboard/Dashboard';
 import SimulationLab from './components/SimulationLab/SimulationLab';
@@ -7,8 +7,9 @@ import MitigationCenter from './components/MitigationCenter/MitigationCenter';
 import Analytics from './components/Analytics/Analytics';
 import About from './components/About/About';
 import DemoScenarios from './components/DemoScenarios';
+import HybridDashboard from './components/HybridDashboard';
 
-type Tab = 'dashboard' | 'demo' | 'simulation' | 'mitigation' | 'analytics' | 'about';
+type Tab = 'dashboard' | 'demo' | 'simulation' | 'mitigation' | 'analytics' | 'about' | 'hybrid';
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>(() => {
@@ -23,6 +24,7 @@ function App() {
   const tabs = [
     { id: 'demo' as Tab, label: '🎯 Demo Scenarios', icon: Presentation },
     { id: 'dashboard' as Tab, label: 'Dashboard', icon: Activity },
+    { id: 'hybrid' as Tab, label: 'Hybrid Monitor', icon: Zap },
     { id: 'simulation' as Tab, label: 'Simulation Lab', icon: TestTube },
     { id: 'mitigation' as Tab, label: 'Mitigation Center', icon: Shield },
     { id: 'analytics' as Tab, label: 'Analytics', icon: BarChart3 },
@@ -65,7 +67,7 @@ function App() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gradient">DNS Security Platform</h1>
-                <p className="text-xs text-gray-400">Attack Simulation & Mitigation</p>
+                <p className="text-xs text-gray-400">Attack Simulation & Mitigation with Hybrid Mode</p>
               </div>
             </div>
             
@@ -109,6 +111,7 @@ function App() {
       <main className="container mx-auto px-6 py-8">
         {activeTab === 'demo' && <DemoScenarios />}
         {activeTab === 'dashboard' && <Dashboard />}
+        {activeTab === 'hybrid' && <HybridDashboard />}
         {activeTab === 'simulation' && <SimulationLab />}
         {activeTab === 'mitigation' && <MitigationCenter />}
         {activeTab === 'analytics' && <Analytics />}
@@ -119,8 +122,8 @@ function App() {
       <footer className="glass border-t border-white/10 mt-16">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between text-sm text-gray-400">
-            <p>© 2025 DNS Security Platform - Diploma Project</p>
-            <p>Built with React + NestJS + PostgreSQL</p>
+            <p>© 2025 DNS Security Platform - Diploma Project (Hybrid Mode Edition)</p>
+            <p>Built with React + NestJS + PostgreSQL + Real DNS Monitoring</p>
           </div>
         </div>
       </footer>
