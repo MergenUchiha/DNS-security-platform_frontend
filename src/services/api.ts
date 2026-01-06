@@ -6,6 +6,7 @@ import type {
   SecurityMetrics,
   AttackStatistics 
 } from '../types';
+export { dnsMonitorAPI } from './dns-monitor-api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 

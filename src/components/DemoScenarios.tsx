@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Play, Target, Shield, Zap, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { simulationAPI } from '../services/api';
+import websocketService from '../services/websocket';
+import EpicSimulationVisualizer from './SimulationLab/EpicSimulationVisualizer';
+import type { SimulationResult } from '../types';
 
 interface DemoScenario {
   id: string;
@@ -23,6 +26,42 @@ interface DemoScenario {
 const DemoScenarios = () => {
   const [selectedScenario, setSelectedScenario] = useState<DemoScenario | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [activeSimulation, setActiveSimulation] = useState<SimulationResult | null>(null);
+
+  // WebSocket listener
+  useEffect(() => {
+    websocketService.connect();
+
+    const handleSimulationUpdate = (data: SimulationResult) => {
+      console.log('📡 Demo Scenario simulation update:', data);
+      
+      const updatedData = {
+        ...data,
+        metrics: data.metrics || {
+          totalQueries: data.totalQueries || 0,
+          spoofedQueries: data.spoofedQueries || 0,
+          blockedQueries: data.blockedQueries || 0,
+          successRate: data.successRate || 0,
+        },
+      };
+      
+      setActiveSimulation(updatedData);
+      setIsRunning(data.status === 'running');
+      
+      if (data.status === 'completed' || data.status === 'stopped') {
+        setTimeout(() => {
+          setActiveSimulation(null);
+          setIsRunning(false);
+        }, 5000);
+      }
+    };
+
+    websocketService.onSimulationUpdate(handleSimulationUpdate);
+
+    return () => {
+      websocketService.offSimulationUpdate(handleSimulationUpdate);
+    };
+  }, []);
 
   const scenarios: DemoScenario[] = [
     {
@@ -137,7 +176,19 @@ const DemoScenarios = () => {
         duration: scenario.duration,
       };
 
-      await simulationAPI.start(config);
+      const result = await simulationAPI.start(config);
+      
+      const simulationWithMetrics = {
+        ...result,
+        metrics: result.metrics || {
+          totalQueries: result.totalQueries || 0,
+          spoofedQueries: result.spoofedQueries || 0,
+          blockedQueries: result.blockedQueries || 0,
+          successRate: result.successRate || 0,
+        },
+      };
+      
+      setActiveSimulation(simulationWithMetrics);
       toast.success(`Scenario started! Watch the real-time defense in action.`, { id: 'scenario' });
     } catch (error) {
       console.error('Failed to run scenario:', error);
@@ -173,6 +224,16 @@ const DemoScenarios = () => {
           </div>
         </div>
       </div>
+
+      {/* Live Visualization (если есть активная симуляция) */}
+      {activeSimulation && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <EpicSimulationVisualizer simulation={activeSimulation} />
+        </motion.div>
+      )}
 
       {/* Scenarios Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -217,7 +278,7 @@ const DemoScenarios = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Target:</span>
-                  <span className="text-white font-mono">{scenario.targetDomain}</span>
+                  <span className="text-white font-mono text-xs">{scenario.targetDomain}</span>
                 </div>
               </div>
 

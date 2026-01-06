@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import MetricsPanel from './MetricsPanel';
-import EpicNetworkGraph from './EpicNetworkGraph';
 import LiveTrafficMonitor from './LiveTrafficMonitor';
 import { mitigationAPI } from '../../services/api';
 import websocketService from '../../services/websocket';
 import type { SecurityMetrics, DNSQuery } from '../../types';
+import SimpleNetworkGraph from '../SimulationLab/SimpleNetworkGraph';
 
 const Dashboard = () => {
   const [metrics, setMetrics] = useState<SecurityMetrics | null>(null);
@@ -19,8 +19,10 @@ const Dashboard = () => {
       console.log('📊 Metrics update received:', data);
       setMetrics(data);
     };
+    
 
     const handleDNSQuery = (query: DNSQuery) => {
+      
       console.log('🔍 DNS query received:', query);
       setRecentQueries((prev) => {
         const updated = [query, ...prev].slice(0, 50);
@@ -71,7 +73,7 @@ const Dashboard = () => {
       <MetricsPanel metrics={metrics} />
 
       <div className="grid grid-cols-1 gap-6">
-        <EpicNetworkGraph queries={recentQueries} />
+        <SimpleNetworkGraph queries={recentQueries} />
         <LiveTrafficMonitor queries={recentQueries} />
       </div>
     </div>
