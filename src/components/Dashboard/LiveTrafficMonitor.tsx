@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, XCircle, AlertTriangle, Clock, Activity } from 'lucide-react';
+import { useI18n } from '../../i18n';
 import type { DNSQuery } from '../../types';
 
 interface Props {
@@ -7,6 +8,8 @@ interface Props {
 }
 
 const LiveTrafficMonitor = ({ queries }: Props) => {
+  const { t } = useI18n();
+  
   const statusConfig = {
     resolved: { icon: CheckCircle, color: 'text-cyber-green', bg: 'bg-cyber-green/20' },
     spoofed: { icon: AlertTriangle, color: 'text-cyber-pink', bg: 'bg-cyber-pink/20' },
@@ -19,11 +22,11 @@ const LiveTrafficMonitor = ({ queries }: Props) => {
   return (
     <div className="glass rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white">Live DNS Traffic</h3>
+        <h3 className="text-lg font-semibold text-white">{t.dashboard.liveDnsTraffic}</h3>
         <div className="flex items-center space-x-2">
           <div className="w-2 h-2 bg-cyber-green rounded-full animate-pulse"></div>
           <span className="text-sm text-gray-400">
-            {queries.length > 0 ? 'Active' : 'No Traffic'}
+            {queries.length > 0 ? t.dashboard.active : t.dashboard.noTraffic}
           </span>
         </div>
       </div>
@@ -32,8 +35,8 @@ const LiveTrafficMonitor = ({ queries }: Props) => {
         {displayQueries.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>No DNS queries yet</p>
-            <p className="text-sm mt-2">Start a simulation to see live traffic</p>
+            <p>{t.dashboard.noDnsQueries}</p>
+            <p className="text-sm mt-2">{t.dashboard.startSimulation}</p>
           </div>
         ) : (
           <AnimatePresence mode="popLayout">

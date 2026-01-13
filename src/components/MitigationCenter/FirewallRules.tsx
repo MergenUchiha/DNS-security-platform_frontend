@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, Plus, Trash2, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useI18n } from '../../i18n';
 import type { MitigationConfig } from '../../types';
 
 interface FirewallRule {
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const FirewallRules = ({ config, onUpdate }: Props) => {
+  const { t } = useI18n();
   const [rules, setRules] = useState<FirewallRule[]>([]);
   const [newRule, setNewRule] = useState({
     type: 'block' as 'allow' | 'block',
@@ -97,8 +99,8 @@ const FirewallRules = ({ config, onUpdate }: Props) => {
             <Shield className="w-6 h-6 text-cyber-pink" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Firewall Rules</h3>
-            <p className="text-sm text-gray-400">IP and domain filtering configuration</p>
+            <h3 className="text-lg font-semibold text-white">{t.mitigation.firewallRules}</h3>
+            <p className="text-sm text-gray-400">{t.mitigation.firewallDesc}</p>
           </div>
         </div>
 
@@ -107,7 +109,7 @@ const FirewallRules = ({ config, onUpdate }: Props) => {
           className="flex items-center space-x-2 px-4 py-2 bg-cyber-blue text-white rounded-lg hover:bg-cyber-blue/80 transition-colors"
         >
           <Plus className="w-4 h-4" />
-          <span>Add Rule</span>
+          <span>{t.mitigation.addRule}</span>
         </button>
       </div>
 
@@ -120,22 +122,22 @@ const FirewallRules = ({ config, onUpdate }: Props) => {
             exit={{ opacity: 0, height: 0 }}
             className="mb-6 p-4 bg-white/5 rounded-lg border border-white/10"
           >
-            <h4 className="text-sm font-medium text-white mb-3">New Firewall Rule</h4>
+            <h4 className="text-sm font-medium text-white mb-3">{t.mitigation.newFirewallRule}</h4>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Rule Type</label>
+                  <label className="block text-xs text-gray-400 mb-1">{t.mitigation.ruleType}</label>
                   <select
                     value={newRule.type}
                     onChange={(e) => setNewRule({ ...newRule, type: e.target.value as 'allow' | 'block' })}
                     className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-cyber-blue focus:outline-none"
                   >
-                    <option value="block">Block</option>
-                    <option value="allow">Allow</option>
+                    <option value="block">{t.mitigation.block}</option>
+                    <option value="allow">{t.mitigation.allow}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-400 mb-1">Target (IP/Domain)</label>
+                  <label className="block text-xs text-gray-400 mb-1">{t.mitigation.targetIpDomain}</label>
                   <input
                     type="text"
                     value={newRule.target}
@@ -146,7 +148,7 @@ const FirewallRules = ({ config, onUpdate }: Props) => {
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Description</label>
+                <label className="block text-xs text-gray-400 mb-1">{t.mitigation.description}</label>
                 <input
                   type="text"
                   value={newRule.description}
@@ -161,13 +163,13 @@ const FirewallRules = ({ config, onUpdate }: Props) => {
                   className="flex items-center space-x-2 px-4 py-2 bg-cyber-green text-white rounded-lg hover:bg-cyber-green/80 transition-colors text-sm"
                 >
                   <Save className="w-4 h-4" />
-                  <span>Save Rule</span>
+                  <span>{t.mitigation.saveRule}</span>
                 </button>
                 <button
                   onClick={() => setShowAddForm(false)}
                   className="px-4 py-2 bg-white/5 text-gray-400 rounded-lg hover:bg-white/10 transition-colors text-sm"
                 >
-                  Cancel
+                  {t.mitigation.cancel}
                 </button>
               </div>
             </div>
@@ -240,7 +242,7 @@ const FirewallRules = ({ config, onUpdate }: Props) => {
       {rules.length === 0 && (
         <div className="text-center py-12 text-gray-500">
           <Shield className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p>No firewall rules configured</p>
+          <p>{t.mitigation.noRulesConfigured}</p>
         </div>
       )}
     </div>

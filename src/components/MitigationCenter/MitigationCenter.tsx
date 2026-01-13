@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useI18n } from '../../i18n';
 import DNSSECValidator from './DNSSECValidator';
 import FirewallRules from './FirewallRules';
 import { mitigationAPI } from '../../services/api';
 import type { MitigationConfig } from '../../types';
 
 const MitigationCenter = () => {
+  const { t } = useI18n();
   const [config, setConfig] = useState<MitigationConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +59,7 @@ const MitigationCenter = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyber-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading configuration...</p>
+          <p className="text-gray-400">{t.mitigation.loadingConfig}</p>
         </div>
       </div>
     );
@@ -67,8 +69,8 @@ const MitigationCenter = () => {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-3xl font-bold text-gradient mb-2">Mitigation Center</h2>
-        <p className="text-gray-400">Configure security mechanisms to protect against DNS attacks</p>
+        <h2 className="text-3xl font-bold text-gradient mb-2">{t.mitigation.title}</h2>
+        <p className="text-gray-400">{t.mitigation.subtitle}</p>
       </div>
 
       {/* Error Message */}

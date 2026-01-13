@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Shield, CheckCircle, XCircle, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useI18n } from '../../i18n';
 import type { MitigationConfig } from '../../types';
 
 interface Props {
@@ -16,6 +17,7 @@ interface ValidationResult {
 }
 
 const DNSSECValidator = ({ config, onUpdate }: Props) => {
+  const { t } = useI18n();
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const enabled = config?.dnssecEnabled ?? true;
 
@@ -29,14 +31,13 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
     }
   };
 
-  // Simulate validation results (in real app, these would come from backend)
+  // Simulate validation results
   useEffect(() => {
     if (!enabled) {
       setValidationResults([]);
       return;
     }
 
-    // Initial mock data
     setValidationResults([
       { domain: 'cloudflare.com', status: 'valid', timestamp: Date.now() - 5000 },
       { domain: 'google.com', status: 'valid', timestamp: Date.now() - 15000 },
@@ -51,8 +52,8 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
             <Shield className="w-6 h-6 text-cyber-purple" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">DNSSEC Validator</h3>
-            <p className="text-sm text-gray-400">Cryptographic validation of DNS responses</p>
+            <h3 className="text-lg font-semibold text-white">{t.mitigation.dnssecValidator}</h3>
+            <p className="text-sm text-gray-400">{t.mitigation.dnssecDesc}</p>
           </div>
         </div>
 
@@ -86,9 +87,9 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
             <>
               <CheckCircle className="w-6 h-6 text-cyber-green" />
               <div>
-                <p className="font-medium text-cyber-green">DNSSEC Protection Active</p>
+                <p className="font-medium text-cyber-green">{t.mitigation.protectionActive}</p>
                 <p className="text-xs text-gray-400 mt-1">
-                  All DNS responses are being cryptographically validated
+                  {t.mitigation.protectionActiveDesc}
                 </p>
               </div>
             </>
@@ -96,9 +97,9 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
             <>
               <XCircle className="w-6 h-6 text-gray-500" />
               <div>
-                <p className="font-medium text-gray-400">DNSSEC Protection Disabled</p>
+                <p className="font-medium text-gray-400">{t.mitigation.protectionDisabled}</p>
                 <p className="text-xs text-gray-500 mt-1">
-                  DNS responses are not being validated - vulnerable to spoofing
+                  {t.mitigation.protectionDisabledDesc}
                 </p>
               </div>
             </>
@@ -110,11 +111,11 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
         <div className="flex items-start space-x-3">
           <Info className="w-5 h-5 text-cyber-blue flex-shrink-0 mt-0.5" />
           <div className="text-sm text-gray-300">
-            <p className="font-medium text-white mb-1">How DNSSEC Works:</p>
+            <p className="font-medium text-white mb-1">{t.mitigation.howDnssecWorks}</p>
             <ul className="space-y-1 text-xs">
-              <li>• Validates DNS responses using digital signatures</li>
-              <li>• Prevents cache poisoning and man-in-the-middle attacks</li>
-              <li>• Ensures data integrity and authenticity</li>
+              <li>• {t.mitigation.validatesDns}</li>
+              <li>• {t.mitigation.preventsCache}</li>
+              <li>• {t.mitigation.ensuresIntegrity}</li>
             </ul>
           </div>
         </div>
@@ -122,7 +123,7 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
 
       <div>
         <h4 className="text-sm font-medium text-white mb-3">
-          Recent Validations ({validationResults.length})
+          {t.mitigation.recentValidations} ({validationResults.length})
         </h4>
         {validationResults.length > 0 ? (
           <div className="space-y-2">
@@ -157,7 +158,7 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
                   }
                 `}
                 >
-                  {result.status.toUpperCase()}
+                  {t.mitigation[result.status]}
                 </span>
               </motion.div>
             ))}
@@ -166,7 +167,7 @@ const DNSSECValidator = ({ config, onUpdate }: Props) => {
           <div className="text-center py-8 text-gray-500">
             <Shield className="w-10 h-10 mx-auto mb-2 opacity-50" />
             <p className="text-sm">
-              {enabled ? 'No validations yet' : 'Enable DNSSEC to see validations'}
+              {enabled ? t.mitigation.noValidations : t.mitigation.enableDnssec}
             </p>
           </div>
         )}

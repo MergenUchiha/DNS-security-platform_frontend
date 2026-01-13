@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Shield, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useI18n } from '../../i18n';
 import type { SecurityMetrics } from '../../types';
 
 interface Props {
@@ -17,6 +18,7 @@ interface DisplayMetric {
 }
 
 const MetricsPanel = ({ metrics }: Props) => {
+  const { t } = useI18n();
   const [previousMetrics, setPreviousMetrics] = useState<SecurityMetrics | null>(null);
 
   useEffect(() => {
@@ -35,7 +37,7 @@ const MetricsPanel = ({ metrics }: Props) => {
 
   const displayMetrics: DisplayMetric[] = [
     {
-      label: 'Total Queries',
+      label: t.dashboard.totalQueries,
       value: metrics?.totalQueries || 0,
       change: previousMetrics
         ? calculateChange(metrics?.totalQueries || 0, previousMetrics.totalQueries)
@@ -45,7 +47,7 @@ const MetricsPanel = ({ metrics }: Props) => {
       glowColor: 'glow-blue',
     },
     {
-      label: 'Threats Detected',
+      label: t.dashboard.threatsDetected,
       value: metrics?.threatsDetected || 0,
       change: previousMetrics
         ? calculateChange(metrics?.threatsDetected || 0, previousMetrics.threatsDetected)
@@ -55,7 +57,7 @@ const MetricsPanel = ({ metrics }: Props) => {
       glowColor: 'glow-purple',
     },
     {
-      label: 'Threats Blocked',
+      label: t.dashboard.threatsBlocked,
       value: metrics?.threatsBlocked || 0,
       change: previousMetrics
         ? calculateChange(metrics?.threatsBlocked || 0, previousMetrics.threatsBlocked)
@@ -65,7 +67,7 @@ const MetricsPanel = ({ metrics }: Props) => {
       glowColor: 'glow-green',
     },
     {
-      label: 'Uptime',
+      label: t.dashboard.uptime,
       value: `${(metrics?.uptime || 100).toFixed(1)}%`,
       change: 0,
       icon: CheckCircle,

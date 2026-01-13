@@ -5,128 +5,176 @@ export interface Translation {
   nav: {
     dashboard: string;
     simulation: string;
+    mitigation: string;
     analytics: string;
-    settings: string;
+    about: string;
   };
   
   // Dashboard
   dashboard: {
     title: string;
     subtitle: string;
-    activeThreats: string;
-    queriesPerSecond: string;
-    mitigationRate: string;
-    systemHealth: string;
-    realtimeMonitoring: string;
-    threatDistribution: string;
-    performanceMetrics: string;
-    recentAttacks: string;
-    attackType: string;
-    severity: string;
-    status: string;
-    time: string;
-    high: string;
-    medium: string;
-    low: string;
+    totalQueries: string;
+    threatsDetected: string;
+    threatsBlocked: string;
+    uptime: string;
+    networkTopology: string;
+    liveDnsTraffic: string;
     active: string;
-    mitigated: string;
-    blocked: string;
+    noTraffic: string;
+    noDnsQueries: string;
+    startSimulation: string;
+    client: string;
+    dns: string;
+    server: string;
+    loadingDashboard: string;
   };
   
   // Simulation
   simulation: {
     title: string;
     subtitle: string;
-    selectAttack: string;
+    attackConfiguration: string;
+    launchAttack: string;
+    stopAttack: string;
+    attackRunning: string;
+    attackType: string;
+    targetDomain: string;
+    spoofedIP: string;
     attackIntensity: string;
     duration: string;
     seconds: string;
-    targetDomain: string;
-    startSimulation: string;
-    stopSimulation: string;
-    running: string;
-    results: string;
-    totalRequests: string;
-    blockedRequests: string;
+    quickPresets: string;
+    attackInProgress: string;
+    attackNeutralized: string;
+    simulationStopped: string;
+    remaining: string;
+    attacker: string;
+    dnsServer: string;
+    processing: string;
+    defenseSystem: string;
+    dnssecFirewall: string;
+    target: string;
+    totalQueries: string;
+    spoofedAttacks: string;
+    blocked: string;
     successRate: string;
-    avgResponseTime: string;
+    readyToSimulate: string;
+    launchAttackDesc: string;
     attacks: {
-      flood: string;
-      amplification: string;
-      tunneling: string;
-      poisoning: string;
-      spoofing: string;
+      dns_cache_poisoning: string;
+      dns_cache_poisoning_desc: string;
+      man_in_the_middle: string;
+      man_in_the_middle_desc: string;
+      local_dns_hijack: string;
+      local_dns_hijack_desc: string;
+      rogue_dns_server: string;
+      rogue_dns_server_desc: string;
     };
     intensity: {
       low: string;
       medium: string;
       high: string;
     };
+    warnings: {
+      simulation: string;
+      minDuration: string;
+    };
+  };
+  
+  // Mitigation
+  mitigation: {
+    title: string;
+    subtitle: string;
+    dnssecValidator: string;
+    dnssecDesc: string;
+    firewallRules: string;
+    firewallDesc: string;
+    protectionActive: string;
+    protectionActiveDesc: string;
+    protectionDisabled: string;
+    protectionDisabledDesc: string;
+    howDnssecWorks: string;
+    validatesDns: string;
+    preventsCache: string;
+    ensuresIntegrity: string;
+    recentValidations: string;
+    noValidations: string;
+    enableDnssec: string;
+    addRule: string;
+    newFirewallRule: string;
+    ruleType: string;
+    block: string;
+    allow: string;
+    targetIpDomain: string;
+    description: string;
+    saveRule: string;
+    cancel: string;
+    noRulesConfigured: string;
+    loadingConfig: string;
+    valid: string;
+    invalid: string;
   };
   
   // Analytics
   analytics: {
     title: string;
     subtitle: string;
-    overview: string;
     timeRange: string;
-    last24h: string;
-    last7d: string;
-    last30d: string;
-    threatTrends: string;
-    geographicDistribution: string;
-    protocolAnalysis: string;
-    topTargets: string;
-    requests: string;
-    blocked: string;
-    country: string;
-    protocol: string;
-    percentage: string;
-    domain: string;
-    attacks: string;
+    last7days: string;
+    last14days: string;
+    last30days: string;
+    attackTimeline: string;
+    days: string;
+    totalAttacks: string;
+    attackTypesDistribution: string;
+    successVsBlocked: string;
+    cachePoisoning: string;
+    mitm: string;
+    dnsHijack: string;
+    rogueServer: string;
+    totalAttacksDetected: string;
+    mitigationSuccessRate: string;
+    totalBlocked: string;
+    successfulAttacks: string;
+    high: string;
+    medium: string;
+    exportReports: string;
+    downloadReports: string;
+    exportPdf: string;
+    exportCsv: string;
+    timePeriod: string;
+    averageDailyAttacks: string;
+    blockRate: string;
+    noAnalyticsData: string;
+    runSimulations: string;
+    loadingAnalytics: string;
   };
   
-  // Settings
-  settings: {
+  // About
+  about: {
     title: string;
     subtitle: string;
-    general: string;
-    security: string;
-    notifications: string;
-    language: string;
-    selectLanguage: string;
-    theme: string;
-    timezone: string;
-    autoUpdate: string;
-    enableAutoUpdate: string;
-    threatLevel: string;
-    selectThreatLevel: string;
-    blockSuspicious: string;
-    enableBlocking: string;
-    rateLimit: string;
-    maxRequests: string;
-    emailAlerts: string;
-    enableEmail: string;
-    slackIntegration: string;
-    enableSlack: string;
-    saveChanges: string;
-    saved: string;
-    languages: {
-      en: string;
-      ru: string;
-      tk: string;
-    };
-    themes: {
-      dark: string;
-      light: string;
-      auto: string;
-    };
-    levels: {
-      low: string;
-      medium: string;
-      high: string;
-      critical: string;
-    };
+    aboutProject: string;
+    projectDesc1: string;
+    projectDesc2: string;
+    attackSimulation: string;
+    attackSimulationDesc: string;
+    realtimeMonitoring: string;
+    realtimeMonitoringDesc: string;
+    protectionMechanisms: string;
+    protectionMechanismsDesc: string;
+    techStack: string;
+    frontend: string;
+    backend: string;
+    keyFeatures: string;
+    author: string;
+    student: string;
+    diplomaProject: string;
+    email: string;
+    footer: string;
+    footerWarning: string;
+    features: string[];
   };
   
   // Common
@@ -144,5 +192,7 @@ export interface Translation {
     filter: string;
     export: string;
     refresh: string;
+    yes: string;
+    no: string;
   };
 }

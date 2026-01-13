@@ -13,6 +13,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+import { useI18n } from '../../i18n';
 import type { AttackStatistics } from '../../types';
 
 interface Props {
@@ -20,6 +21,8 @@ interface Props {
 }
 
 const AttackCharts = ({ statistics }: Props) => {
+  const { t } = useI18n();
+
   // Transform data for timeline chart
   const timelineData = statistics.map((stat) => ({
     date: new Date(stat.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -42,22 +45,22 @@ const AttackCharts = ({ statistics }: Props) => {
 
   const attackTypesData = [
     {
-      name: 'Cache Poisoning',
+      name: t.analytics.cachePoisoning,
       value: totalAttackTypes.dns_cache_poisoning || 0,
       color: '#00d9ff',
     },
     {
-      name: 'MITM',
+      name: t.analytics.mitm,
       value: totalAttackTypes.man_in_the_middle || 0,
       color: '#b537f2',
     },
     {
-      name: 'DNS Hijack',
+      name: t.analytics.dnsHijack,
       value: totalAttackTypes.local_dns_hijack || 0,
       color: '#ff2e97',
     },
     {
-      name: 'Rogue Server',
+      name: t.analytics.rogueServer,
       value: totalAttackTypes.rogue_dns_server || 0,
       color: '#00ff88',
     },
@@ -66,8 +69,8 @@ const AttackCharts = ({ statistics }: Props) => {
   if (statistics.length === 0) {
     return (
       <div className="glass rounded-xl p-12 text-center">
-        <p className="text-gray-400">No analytics data available</p>
-        <p className="text-sm text-gray-500 mt-2">Run some simulations to generate data</p>
+        <p className="text-gray-400">{t.analytics.noAnalyticsData}</p>
+        <p className="text-sm text-gray-500 mt-2">{t.analytics.runSimulations}</p>
       </div>
     );
   }
@@ -77,7 +80,7 @@ const AttackCharts = ({ statistics }: Props) => {
       {/* Attack Timeline */}
       <div className="glass rounded-xl p-6">
         <h3 className="text-lg font-semibold text-white mb-6">
-          Attack Timeline - Last {statistics.length} Days
+          {t.analytics.attackTimeline} - {statistics.length} {t.analytics.days}
         </h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={timelineData}>
@@ -97,7 +100,7 @@ const AttackCharts = ({ statistics }: Props) => {
               dataKey="total"
               stroke="#00d9ff"
               strokeWidth={2}
-              name="Total Attacks"
+              name={t.analytics.totalAttacks}
               dot={{ fill: '#00d9ff', r: 4 }}
             />
             <Line
@@ -105,7 +108,7 @@ const AttackCharts = ({ statistics }: Props) => {
               dataKey="blocked"
               stroke="#00ff88"
               strokeWidth={2}
-              name="Blocked"
+              name={t.simulation.blocked}
               dot={{ fill: '#00ff88', r: 4 }}
             />
             <Line
@@ -113,7 +116,7 @@ const AttackCharts = ({ statistics }: Props) => {
               dataKey="successful"
               stroke="#ff2e97"
               strokeWidth={2}
-              name="Successful"
+              name={t.analytics.successfulAttacks}
               dot={{ fill: '#ff2e97', r: 4 }}
             />
           </LineChart>
@@ -123,7 +126,7 @@ const AttackCharts = ({ statistics }: Props) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Attack Types Distribution */}
         <div className="glass rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-6">Attack Types Distribution</h3>
+          <h3 className="text-lg font-semibold text-white mb-6">{t.analytics.attackTypesDistribution}</h3>
           {attackTypesData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -159,7 +162,7 @@ const AttackCharts = ({ statistics }: Props) => {
 
         {/* Success vs Blocked */}
         <div className="glass rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-white mb-6">Success vs Blocked Rate</h3>
+          <h3 className="text-lg font-semibold text-white mb-6">{t.analytics.successVsBlocked}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={timelineData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
@@ -173,8 +176,8 @@ const AttackCharts = ({ statistics }: Props) => {
                 }}
               />
               <Legend />
-              <Bar dataKey="blocked" fill="#00ff88" name="Blocked" />
-              <Bar dataKey="successful" fill="#ff2e97" name="Successful" />
+              <Bar dataKey="blocked" fill="#00ff88" name={t.simulation.blocked} />
+              <Bar dataKey="successful" fill="#ff2e97" name={t.analytics.successfulAttacks} />
             </BarChart>
           </ResponsiveContainer>
         </div>

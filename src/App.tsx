@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Shield, Activity, TestTube, BarChart3, Info, Presentation, Zap } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
+import { I18nProvider, useI18n } from './i18n';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import Dashboard from './components/Dashboard/Dashboard';
 import SimulationLab from './components/SimulationLab/SimulationLab';
 import MitigationCenter from './components/MitigationCenter/MitigationCenter';
@@ -11,7 +13,8 @@ import HybridDashboard from './components/HybridDashboard';
 
 type Tab = 'dashboard' | 'demo' | 'simulation' | 'mitigation' | 'analytics' | 'about' | 'hybrid';
 
-function App() {
+function AppContent() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     const saved = localStorage.getItem('activeTab');
     return (saved as Tab) || 'demo';
@@ -23,12 +26,12 @@ function App() {
 
   const tabs = [
     { id: 'demo' as Tab, label: '🎯 Demo Scenarios', icon: Presentation },
-    { id: 'dashboard' as Tab, label: 'Dashboard', icon: Activity },
+    { id: 'dashboard' as Tab, label: t.nav.dashboard, icon: Activity },
     { id: 'hybrid' as Tab, label: 'Hybrid Monitor', icon: Zap },
-    { id: 'simulation' as Tab, label: 'Simulation Lab', icon: TestTube },
-    { id: 'mitigation' as Tab, label: 'Mitigation Center', icon: Shield },
-    { id: 'analytics' as Tab, label: 'Analytics', icon: BarChart3 },
-    { id: 'about' as Tab, label: 'About', icon: Info },
+    { id: 'simulation' as Tab, label: t.nav.simulation, icon: TestTube },
+    { id: 'mitigation' as Tab, label: t.nav.mitigation, icon: Shield },
+    { id: 'analytics' as Tab, label: t.nav.analytics, icon: BarChart3 },
+    { id: 'about' as Tab, label: t.nav.about, icon: Info },
   ];
 
   return (
@@ -61,6 +64,7 @@ function App() {
       <header className="glass border-b border-white/10 sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
+            {/* Logo */}
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-cyber-blue to-cyber-purple rounded-lg flex items-center justify-center">
                 <Shield className="w-6 h-6 text-white" />
@@ -71,10 +75,12 @@ function App() {
               </div>
             </div>
             
-            <div className="flex items-center space-x-2">
+            {/* Right Side - Status + Language Switcher */}
+            <div className="flex items-center space-x-4">
               <div className="px-3 py-1 bg-cyber-green/20 text-cyber-green text-xs rounded-full">
                 System Active
               </div>
+              <LanguageSwitcher />
             </div>
           </div>
         </div>
@@ -128,6 +134,15 @@ function App() {
         </div>
       </footer>
     </div>
+  );
+}
+
+// Main App Component with I18nProvider wrapper
+function App() {
+  return (
+    <I18nProvider>
+      <AppContent />
+    </I18nProvider>
   );
 }
 

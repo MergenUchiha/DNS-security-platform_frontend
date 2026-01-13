@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Play, Square, Zap } from 'lucide-react';
+import { useI18n } from '../../i18n';
 import type { AttackConfig, AttackType } from '../../types';
 
 interface Props {
@@ -9,39 +10,39 @@ interface Props {
 }
 
 const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
+  const { t } = useI18n();
   const [config, setConfig] = useState<AttackConfig>({
     type: 'dns_cache_poisoning',
     targetDomain: 'example.com',
     spoofedIP: '192.168.1.100',
     intensity: 'medium',
-    duration: 60, // Default 60 seconds
+    duration: 60,
   });
 
   const attackTypes: { value: AttackType; label: string; description: string }[] = [
     {
       value: 'dns_cache_poisoning',
-      label: 'DNS Cache Poisoning',
-      description: 'Inject false DNS records into cache',
+      label: t.simulation.attacks.dns_cache_poisoning,
+      description: t.simulation.attacks.dns_cache_poisoning_desc,
     },
     {
       value: 'man_in_the_middle',
-      label: 'Man-in-the-Middle',
-      description: 'Intercept and modify DNS responses',
+      label: t.simulation.attacks.man_in_the_middle,
+      description: t.simulation.attacks.man_in_the_middle_desc,
     },
     {
       value: 'local_dns_hijack',
-      label: 'Local DNS Hijack',
-      description: 'Override local DNS resolver settings',
+      label: t.simulation.attacks.local_dns_hijack,
+      description: t.simulation.attacks.local_dns_hijack_desc,
     },
     {
       value: 'rogue_dns_server',
-      label: 'Rogue DNS Server',
-      description: 'Set up malicious DNS server',
+      label: t.simulation.attacks.rogue_dns_server,
+      description: t.simulation.attacks.rogue_dns_server_desc,
     },
   ];
 
   const handleStart = () => {
-    // Validate duration before sending
     if (config.duration < 10) {
       alert('Duration must be at least 10 seconds');
       return;
@@ -57,14 +58,14 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
     <div className="glass rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-xl font-semibold text-white mb-1">Attack Configuration</h3>
-          <p className="text-sm text-gray-400">Configure and launch DNS spoofing simulation</p>
+          <h3 className="text-xl font-semibold text-white mb-1">{t.simulation.attackConfiguration}</h3>
+          <p className="text-sm text-gray-400">{t.simulation.subtitle}</p>
         </div>
         <div className="flex items-center space-x-2">
           {isRunning && (
             <div className="flex items-center space-x-2 px-3 py-1 bg-cyber-pink/20 text-cyber-pink rounded-full text-sm">
               <div className="w-2 h-2 bg-cyber-pink rounded-full animate-pulse"></div>
-              <span>Attack Running</span>
+              <span>{t.simulation.attackRunning}</span>
             </div>
           )}
         </div>
@@ -73,7 +74,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
       <div className="space-y-6">
         {/* Attack Type Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-3">Attack Type</label>
+          <label className="block text-sm font-medium text-gray-300 mb-3">{t.simulation.attackType}</label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {attackTypes.map((type) => (
               <button
@@ -100,7 +101,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
         {/* Target Configuration */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Target Domain</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">{t.simulation.targetDomain}</label>
             <input
               type="text"
               value={config.targetDomain}
@@ -113,7 +114,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Spoofed IP Address
+              {t.simulation.spoofedIP}
             </label>
             <input
               type="text"
@@ -130,7 +131,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Attack Intensity
+              {t.simulation.attackIntensity}
             </label>
             <div className="flex space-x-2">
               {(['low', 'medium', 'high'] as const).map((level) => (
@@ -148,7 +149,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
                     ${isRunning ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                   `}
                 >
-                  {level.toUpperCase()}
+                  {t.simulation.intensity[level]}
                 </button>
               ))}
             </div>
@@ -156,7 +157,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Duration: {config.duration} seconds
+              {t.simulation.duration}: {config.duration} {t.simulation.seconds}
             </label>
             <div className="space-y-2">
               <input
@@ -179,7 +180,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
 
         {/* Quick Duration Presets */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Quick Presets</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">{t.simulation.quickPresets}</label>
           <div className="flex space-x-2">
             {[30, 60, 120, 180].map((seconds) => (
               <button
@@ -210,7 +211,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
               className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-gradient-to-r from-cyber-blue to-cyber-purple text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300 glow-blue"
             >
               <Play className="w-5 h-5" />
-              <span>Launch Attack</span>
+              <span>{t.simulation.launchAttack}</span>
               <Zap className="w-5 h-5" />
             </button>
           ) : (
@@ -219,7 +220,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
               className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-cyber-pink text-white font-semibold rounded-lg hover:shadow-lg hover:scale-105 transition-all duration-300"
             >
               <Square className="w-5 h-5" />
-              <span>Stop Attack</span>
+              <span>{t.simulation.stopAttack}</span>
             </button>
           )}
         </div>
@@ -229,8 +230,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
           {/* Warning */}
           <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
             <p className="text-sm text-yellow-200">
-              ⚠️ This is a simulated attack in a controlled environment. No real networks or
-              systems will be affected.
+              ⚠️ {t.simulation.warnings.simulation}
             </p>
           </div>
 
@@ -238,7 +238,7 @@ const AttackConfigurator = ({ onStart, onStop, isRunning }: Props) => {
           {config.duration < 10 && (
             <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
               <p className="text-sm text-red-200">
-                ❌ Duration must be at least 10 seconds (currently {config.duration}s)
+                ❌ {t.simulation.warnings.minDuration} (currently {config.duration}s)
               </p>
             </div>
           )}

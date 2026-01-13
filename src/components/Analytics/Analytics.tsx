@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useI18n } from '../../i18n';
 import AttackCharts from './AttackCharts';
 import SecurityReports from './SecurityReports';
 import { analyticsAPI } from '../../services/api';
 import type { AttackStatistics } from '../../types';
 
 const Analytics = () => {
+  const { t } = useI18n();
   const [statistics, setStatistics] = useState<AttackStatistics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ const Analytics = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyber-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading analytics...</p>
+          <p className="text-gray-400">{t.analytics.loadingAnalytics}</p>
         </div>
       </div>
     );
@@ -44,21 +46,19 @@ const Analytics = () => {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-gradient mb-2">Security Analytics</h2>
-          <p className="text-gray-400">
-            Comprehensive analysis of attack patterns and mitigation effectiveness
-          </p>
+          <h2 className="text-3xl font-bold text-gradient mb-2">{t.analytics.title}</h2>
+          <p className="text-gray-400">{t.analytics.subtitle}</p>
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-400">Time Range:</span>
+          <span className="text-sm text-gray-400">{t.analytics.timeRange}:</span>
           <select
             value={days}
             onChange={(e) => setDays(parseInt(e.target.value))}
             className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-cyber-blue focus:outline-none"
           >
-            <option value={7}>Last 7 days</option>
-            <option value={14}>Last 14 days</option>
-            <option value={30}>Last 30 days</option>
+            <option value={7}>{t.analytics.last7days}</option>
+            <option value={14}>{t.analytics.last14days}</option>
+            <option value={30}>{t.analytics.last30days}</option>
           </select>
         </div>
       </div>

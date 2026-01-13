@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useI18n } from '../../i18n';
 import MetricsPanel from './MetricsPanel';
 import LiveTrafficMonitor from './LiveTrafficMonitor';
 import { mitigationAPI } from '../../services/api';
@@ -7,6 +8,7 @@ import type { SecurityMetrics, DNSQuery } from '../../types';
 import SimpleNetworkGraph from '../SimulationLab/SimpleNetworkGraph';
 
 const Dashboard = () => {
+  const { t } = useI18n();
   const [metrics, setMetrics] = useState<SecurityMetrics | null>(null);
   const [recentQueries, setRecentQueries] = useState<DNSQuery[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,9 +22,7 @@ const Dashboard = () => {
       setMetrics(data);
     };
     
-
     const handleDNSQuery = (query: DNSQuery) => {
-      
       console.log('🔍 DNS query received:', query);
       setRecentQueries((prev) => {
         const updated = [query, ...prev].slice(0, 50);
@@ -57,7 +57,7 @@ const Dashboard = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyber-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading dashboard...</p>
+          <p className="text-gray-400">{t.dashboard.loadingDashboard}</p>
         </div>
       </div>
     );
@@ -66,8 +66,8 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold text-gradient mb-2">Security Dashboard</h2>
-        <p className="text-gray-400">Real-time monitoring of DNS traffic and security events</p>
+        <h2 className="text-3xl font-bold text-gradient mb-2">{t.dashboard.title}</h2>
+        <p className="text-gray-400">{t.dashboard.subtitle}</p>
       </div>
 
       <MetricsPanel metrics={metrics} />

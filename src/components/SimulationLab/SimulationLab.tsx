@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { useI18n } from '../../i18n';
 import AttackConfigurator from './AttackConfigurator';
 import EpicSimulationVisualizer from './EpicSimulationVisualizer';
 import type { AttackConfig, SimulationResult } from '../../types';
@@ -7,6 +8,7 @@ import { simulationAPI } from '../../services/api';
 import websocketService from '../../services/websocket';
 
 const SimulationLab = () => {
+  const { t } = useI18n();
   const [simulation, setSimulation] = useState<SimulationResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,8 +116,8 @@ const SimulationLab = () => {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-3xl font-bold text-gradient mb-2">Simulation Laboratory</h2>
-        <p className="text-gray-400">Configure and execute controlled DNS spoofing attacks with real-time visualization</p>
+        <h2 className="text-3xl font-bold text-gradient mb-2">{t.simulation.title}</h2>
+        <p className="text-gray-400">{t.simulation.subtitle}</p>
       </div>
 
       {/* Error Message */}

@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Shield, Zap, AlertTriangle, CheckCircle, XCircle, Activity } from 'lucide-react';
+import { useI18n } from '../../i18n';
 import type { SimulationResult } from '../../types';
-
 
 interface Props {
   simulation: SimulationResult | null;
 }
 
 const EpicSimulationVisualizer = ({ simulation }: Props) => {
+  const { t } = useI18n();
   const [progress, setProgress] = useState(0);
   const [elapsed, setElapsed] = useState(0);
 
@@ -53,9 +54,9 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyber-blue to-cyber-purple animate-pulse opacity-50" />
             <Shield className="w-12 h-12 text-white relative z-10" />
           </div>
-          <h3 className="text-2xl font-bold text-gradient mb-3">Ready to Simulate</h3>
+          <h3 className="text-2xl font-bold text-gradient mb-3">{t.simulation.readyToSimulate}</h3>
           <p className="text-gray-400 max-w-md mx-auto">
-            Launch an attack simulation to see the cybersecurity defense system in action
+            {t.simulation.launchAttackDesc}
           </p>
         </motion.div>
       </div>
@@ -84,19 +85,19 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
       color: 'from-cyber-pink to-red-600',
       glow: 'shadow-[0_0_40px_rgba(255,46,151,0.6)]',
       icon: Zap,
-      text: 'ATTACK IN PROGRESS',
+      text: t.simulation.attackInProgress,
     },
     completed: {
       color: 'from-cyber-green to-green-600',
       glow: 'shadow-[0_0_40px_rgba(0,255,136,0.6)]',
       icon: CheckCircle,
-      text: 'ATTACK NEUTRALIZED',
+      text: t.simulation.attackNeutralized,
     },
     stopped: {
       color: 'from-gray-500 to-gray-600',
       glow: 'shadow-[0_0_40px_rgba(156,163,175,0.6)]',
       icon: XCircle,
-      text: 'SIMULATION STOPPED',
+      text: t.simulation.simulationStopped,
     },
   };
 
@@ -137,7 +138,7 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
             <div>
               <h2 className="text-2xl font-bold text-white mb-1">{status.text}</h2>
               <p className="text-gray-400">
-                Attack Type: <span className="text-cyber-blue font-mono">{config.type?.replace(/_/g, ' ').toUpperCase()}</span>
+                {t.simulation.attackType}: <span className="text-cyber-blue font-mono">{config.type?.replace(/_/g, ' ').toUpperCase()}</span>
               </p>
             </div>
           </div>
@@ -145,15 +146,14 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
           {simulation.status === 'running' && (
             <div className="text-right">
               <div className="text-4xl font-bold text-white mb-1">{remaining}s</div>
-              <div className="text-sm text-gray-400">remaining</div>
+              <div className="text-sm text-gray-400">{t.simulation.remaining}</div>
             </div>
           )}
         </div>
       </motion.div>
 
-      {/* Main Visualization Area */}
+      {/* Main Visualization Area with 4 Nodes */}
       <div className="glass rounded-xl overflow-hidden relative p-12" style={{ minHeight: '400px' }}>
-        {/* 4 Nodes Network */}
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           {/* 1. Attacker Node */}
           <motion.div
@@ -171,7 +171,6 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
               className="w-32 h-32 bg-gradient-to-br from-cyber-pink to-red-600 rounded-full flex items-center justify-center relative"
             >
               <AlertTriangle className="w-16 h-16 text-white" />
-              
               {simulation.status === 'running' && (
                 <>
                   <motion.div
@@ -187,14 +186,13 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
                 </>
               )}
             </motion.div>
-            
             <div className="text-center mt-4">
-              <p className="text-white font-bold text-lg">ATTACKER</p>
+              <p className="text-white font-bold text-lg">{t.simulation.attacker}</p>
               <p className="text-xs text-cyber-pink font-mono">{config.spoofedIP}</p>
             </div>
           </motion.div>
 
-          {/* Connection Line 1: Attacker -> DNS */}
+          {/* Connection Line 1 */}
           <div className="flex-1 relative h-1 mx-8">
             <div className="absolute inset-0 bg-gradient-to-r from-cyber-pink/30 to-cyber-blue/30 rounded-full" />
             {simulation.status === 'running' && (
@@ -224,14 +222,13 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
             >
               <Activity className="w-16 h-16 text-white" />
             </motion.div>
-            
             <div className="text-center mt-4">
-              <p className="text-white font-bold text-lg">DNS SERVER</p>
-              <p className="text-xs text-cyber-blue">Processing</p>
+              <p className="text-white font-bold text-lg">{t.simulation.dnsServer}</p>
+              <p className="text-xs text-cyber-blue">{t.simulation.processing}</p>
             </div>
           </motion.div>
 
-          {/* Connection Line 2: DNS -> Defense */}
+          {/* Connection Line 2 */}
           <div className="flex-1 relative h-1 mx-8">
             <div className="absolute inset-0 bg-gradient-to-r from-cyber-blue/30 to-cyber-purple/30 rounded-full" />
             {simulation.status === 'running' && (
@@ -264,7 +261,6 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
               className="w-32 h-32 bg-gradient-to-br from-cyber-purple to-purple-600 rounded-full flex items-center justify-center relative"
             >
               <Shield className="w-16 h-16 text-white" />
-              
               {simulation.status === 'running' && metrics.blockedQueries > 0 && (
                 <motion.div
                   className="absolute inset-0 border-4 border-cyber-green rounded-full"
@@ -273,14 +269,13 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
                 />
               )}
             </motion.div>
-            
             <div className="text-center mt-4">
-              <p className="text-white font-bold text-lg">DEFENSE SYSTEM</p>
-              <p className="text-xs text-cyber-purple">DNSSEC + Firewall</p>
+              <p className="text-white font-bold text-lg">{t.simulation.defenseSystem}</p>
+              <p className="text-xs text-cyber-purple">{t.simulation.dnssecFirewall}</p>
             </div>
           </motion.div>
 
-          {/* Connection Line 3: Defense -> Target */}
+          {/* Connection Line 3 */}
           <div className="flex-1 relative h-1 mx-8">
             <div className="absolute inset-0 bg-gradient-to-r from-cyber-purple/30 to-cyber-green/30 rounded-full" />
             {simulation.status === 'running' && (
@@ -308,7 +303,6 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
               className="w-32 h-32 bg-gradient-to-br from-cyber-green to-green-600 rounded-full flex items-center justify-center relative"
             >
               <CheckCircle className="w-16 h-16 text-white" />
-              
               {simulation.status === 'completed' && (
                 <motion.div
                   initial={{ scale: 0 }}
@@ -318,9 +312,8 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
                 />
               )}
             </motion.div>
-            
             <div className="text-center mt-4">
-              <p className="text-white font-bold text-lg">TARGET</p>
+              <p className="text-white font-bold text-lg">{t.simulation.target}</p>
               <p className="text-xs text-cyber-green font-mono">{config.targetDomain}</p>
             </div>
           </motion.div>
@@ -340,10 +333,10 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
       {/* Metrics Dashboard */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Total Queries', value: metrics.totalQueries, color: 'from-cyber-blue to-blue-600', icon: Activity },
-          { label: 'Spoofed Attacks', value: metrics.spoofedQueries, color: 'from-cyber-pink to-red-600', icon: AlertTriangle },
-          { label: 'Blocked', value: metrics.blockedQueries, color: 'from-cyber-purple to-purple-600', icon: Shield },
-          { label: 'Success Rate', value: `${metrics.successRate.toFixed(1)}%`, color: 'from-cyber-green to-green-600', icon: CheckCircle },
+          { label: t.simulation.totalQueries, value: metrics.totalQueries, color: 'from-cyber-blue to-blue-600', icon: Activity },
+          { label: t.simulation.spoofedAttacks, value: metrics.spoofedQueries, color: 'from-cyber-pink to-red-600', icon: AlertTriangle },
+          { label: t.simulation.blocked, value: metrics.blockedQueries, color: 'from-cyber-purple to-purple-600', icon: Shield },
+          { label: t.simulation.successRate, value: `${metrics.successRate.toFixed(1)}%`, color: 'from-cyber-green to-green-600', icon: CheckCircle },
         ].map((metric, idx) => {
           const Icon = metric.icon;
           return (
@@ -361,7 +354,6 @@ const EpicSimulationVisualizer = ({ simulation }: Props) => {
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
-              
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-3">
                   <Icon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 0 10px currentColor)' }} />

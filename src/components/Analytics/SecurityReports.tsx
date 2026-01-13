@@ -1,6 +1,7 @@
 import { Download, TrendingUp, TrendingDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useI18n } from '../../i18n';
 import { analyticsAPI } from '../../services/api';
 import type { AttackStatistics } from '../../types';
 
@@ -9,6 +10,8 @@ interface Props {
 }
 
 const SecurityReports = ({ statistics }: Props) => {
+  const { t } = useI18n();
+
   // Calculate summary statistics
   const totalAttacks = statistics.reduce((sum, s) => sum + s.total, 0);
   const totalBlocked = statistics.reduce((sum, s) => sum + s.blocked, 0);
@@ -29,28 +32,28 @@ const SecurityReports = ({ statistics }: Props) => {
 
   const stats = [
     {
-      label: 'Total Attacks Detected',
+      label: t.analytics.totalAttacksDetected,
       value: totalAttacks.toLocaleString(),
       change: `${attackTrend > 0 ? '+' : ''}${attackTrend.toFixed(1)}%`,
       trend: attackTrend >= 0 ? 'up' : 'down',
       color: 'text-cyber-blue',
     },
     {
-      label: 'Mitigation Success Rate',
+      label: t.analytics.mitigationSuccessRate,
       value: `${mitigationRate.toFixed(1)}%`,
-      change: mitigationRate > 90 ? '+High' : 'Medium',
+      change: mitigationRate > 90 ? `+${t.analytics.high}` : t.analytics.medium,
       trend: mitigationRate > 90 ? 'up' : 'down',
       color: 'text-cyber-green',
     },
     {
-      label: 'Total Blocked',
+      label: t.analytics.totalBlocked,
       value: totalBlocked.toLocaleString(),
       change: `${((totalBlocked / (totalAttacks || 1)) * 100).toFixed(1)}%`,
       trend: 'up',
       color: 'text-cyber-purple',
     },
     {
-      label: 'Successful Attacks',
+      label: t.analytics.successfulAttacks,
       value: totalSuccessful.toLocaleString(),
       change: `${((totalSuccessful / (totalAttacks || 1)) * 100).toFixed(1)}%`,
       trend: 'down',
@@ -120,8 +123,8 @@ const SecurityReports = ({ statistics }: Props) => {
       <div className="glass rounded-xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-white">Export Reports</h3>
-            <p className="text-sm text-gray-400 mt-1">Download security analytics reports</p>
+            <h3 className="text-lg font-semibold text-white">{t.analytics.exportReports}</h3>
+            <p className="text-sm text-gray-400 mt-1">{t.analytics.downloadReports}</p>
           </div>
           <div className="flex space-x-2">
             <button
@@ -129,14 +132,14 @@ const SecurityReports = ({ statistics }: Props) => {
               className="flex items-center space-x-2 px-4 py-2 bg-cyber-blue text-white rounded-lg hover:bg-cyber-blue/80 transition-colors text-sm"
             >
               <Download className="w-4 h-4" />
-              <span>Export PDF</span>
+              <span>{t.analytics.exportPdf}</span>
             </button>
             <button
               onClick={() => handleExport('csv')}
               className="flex items-center space-x-2 px-4 py-2 bg-cyber-purple text-white rounded-lg hover:bg-cyber-purple/80 transition-colors text-sm"
             >
               <Download className="w-4 h-4" />
-              <span>Export CSV</span>
+              <span>{t.analytics.exportCsv}</span>
             </button>
           </div>
         </div>
@@ -144,17 +147,17 @@ const SecurityReports = ({ statistics }: Props) => {
         {/* Summary Info */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-            <p className="text-sm text-gray-400 mb-1">Time Period</p>
-            <p className="text-lg font-semibold text-white">{statistics.length} days</p>
+            <p className="text-sm text-gray-400 mb-1">{t.analytics.timePeriod}</p>
+            <p className="text-lg font-semibold text-white">{statistics.length} {t.analytics.days}</p>
           </div>
           <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-            <p className="text-sm text-gray-400 mb-1">Average Daily Attacks</p>
+            <p className="text-sm text-gray-400 mb-1">{t.analytics.averageDailyAttacks}</p>
             <p className="text-lg font-semibold text-white">
               {(totalAttacks / statistics.length).toFixed(1)}
             </p>
           </div>
           <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-            <p className="text-sm text-gray-400 mb-1">Block Rate</p>
+            <p className="text-sm text-gray-400 mb-1">{t.analytics.blockRate}</p>
             <p className="text-lg font-semibold text-white">{mitigationRate.toFixed(1)}%</p>
           </div>
         </div>

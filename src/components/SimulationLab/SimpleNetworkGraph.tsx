@@ -1,12 +1,17 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { useI18n } from '../../i18n';
 import type { DNSQuery } from '../../types';
 
 interface Props {
   queries: DNSQuery[];
 }
 
+const cameraRef = { current: null as THREE.PerspectiveCamera | null };
+const rendererRef = { current: null as THREE.WebGLRenderer | null };
+
 const SimpleNetworkGraph = ({ queries }: Props) => {
+  const { t } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const nodesRef = useRef<THREE.Mesh[]>([]);
@@ -49,10 +54,10 @@ const SimpleNetworkGraph = ({ queries }: Props) => {
 
     // Create 4 nodes
     const nodeData = [
-      { pos: [-8, 0, 0], color: 0x00d9ff, label: 'Client' },
-      { pos: [-2, 3, 0], color: 0xb537f2, label: 'DNS 1' },
-      { pos: [-2, -3, 0], color: 0xff2e97, label: 'DNS 2' },
-      { pos: [8, 0, 0], color: 0x00ff88, label: 'Server' },
+      { pos: [-8, 0, 0], color: 0x00d9ff },
+      { pos: [-2, 3, 0], color: 0xb537f2 },
+      { pos: [-2, -3, 0], color: 0xff2e97 },
+      { pos: [8, 0, 0], color: 0x00ff88 },
     ];
 
     nodeData.forEach(({ pos, color }) => {
@@ -153,19 +158,19 @@ const SimpleNetworkGraph = ({ queries }: Props) => {
     <div className="glass rounded-xl overflow-hidden">
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white">Network Topology</h3>
+          <h3 className="text-lg font-semibold text-white">{t.dashboard.networkTopology}</h3>
           <div className="flex items-center space-x-6 text-sm">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-cyber-blue rounded-full animate-pulse" />
-              <span className="text-gray-400">Client</span>
+              <span className="text-gray-400">{t.dashboard.client}</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-cyber-purple rounded-full animate-pulse" />
-              <span className="text-gray-400">DNS</span>
+              <span className="text-gray-400">{t.dashboard.dns}</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-cyber-green rounded-full animate-pulse" />
-              <span className="text-gray-400">Server</span>
+              <span className="text-gray-400">{t.dashboard.server}</span>
             </div>
           </div>
         </div>
@@ -174,15 +179,15 @@ const SimpleNetworkGraph = ({ queries }: Props) => {
       <div ref={containerRef} className="w-full h-[400px] relative">
         <div className="absolute top-4 left-4 glass rounded-lg p-3 space-y-1 text-xs z-10">
           <div className="flex items-center justify-between space-x-4">
-            <span className="text-gray-400">Total:</span>
+            <span className="text-gray-400">{t.simulation.totalQueries}:</span>
             <span className="text-white font-bold">{stats.total}</span>
           </div>
           <div className="flex items-center justify-between space-x-4">
-            <span className="text-gray-400">Blocked:</span>
+            <span className="text-gray-400">{t.simulation.blocked}:</span>
             <span className="text-cyber-green font-bold">{stats.blocked}</span>
           </div>
           <div className="flex items-center justify-between space-x-4">
-            <span className="text-gray-400">Spoofed:</span>
+            <span className="text-gray-400">{t.simulation.spoofedAttacks}:</span>
             <span className="text-cyber-pink font-bold">{stats.spoofed}</span>
           </div>
         </div>
@@ -190,9 +195,5 @@ const SimpleNetworkGraph = ({ queries }: Props) => {
     </div>
   );
 };
-
-// Need to add missing refs
-const cameraRef = { current: null as THREE.PerspectiveCamera | null };
-const rendererRef = { current: null as THREE.WebGLRenderer | null };
 
 export default SimpleNetworkGraph;
