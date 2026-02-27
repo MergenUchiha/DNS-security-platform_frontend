@@ -1,270 +1,79 @@
-# DNS Security Platform - Frontend
+# DNS Lab Frontend
 
-Интерактивная платформа для симуляции DNS Spoofing атак и демонстрации защиты.
+React + Vite + TypeScript frontend for the DNS Spoofing Attack Simulation & Mitigation lab.
 
-## 🎨 Технологии
+## Stack
 
-- **React 18** - UI библиотека
-- **TypeScript** - Типизация
-- **Vite** - Сборщик
-- **Tailwind CSS** - Стилизация
-- **Three.js** - 3D визуализация сети
-- **Recharts** - Графики и аналитика
-- **Framer Motion** - Анимации
-- **Lucide React** - Иконки
-- **Axios** - HTTP клиент
+- **React 18** + **TypeScript**
+- **Vite** (dev server + build)
+- **Tailwind CSS** — utility-first styling
+- **Recharts** — charts for the report page
+- **React Router v6** — client-side routing
+- **Axios** — HTTP client with `/api` proxy
+- **react-hot-toast** — notifications
+- **framer-motion** — animations
+- **lucide-react** — icons
 
-## 📦 Установка
+## Features
 
-### 1. Установите зависимости
+- 🌐 **Multilingual**: English / Русский / Türkmen
+- 🌓 **Dark / Light theme** (persisted in localStorage)
+- 📊 **Dashboard** — live stats, mode switcher, recent events
+- 🔍 **DNS Resolver** — resolve domains + target URL detection
+- 🛡️ **Mitigation Policies** — CRUD for IP allowlists
+- 📋 **Event Log** — filterable by severity, collapsible payload
+- 📈 **Report** — bar charts, domain analysis, JSON download
+- 🚀 **Demo** — full Safe→Attack→Mitigated simulation
+- 💓 **Health** — backend status + API endpoint reference
+
+## Development
 
 ```bash
-cd frontend
 npm install
+npm run dev          # http://localhost:5173
 ```
 
-### 2. Настройте переменные окружения (опционально)
+The Vite dev server proxies `/api/*` → `http://localhost:3000/*`.
 
-Создайте файл `.env` в корне папки frontend:
+## Production (Docker)
 
-```env
-VITE_API_URL=http://localhost:3000/api
+Add to `infra/docker-compose.yml`:
+
+```yaml
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: dns_lab_frontend
+    ports:
+      - '5173:80'
+    depends_on:
+      - api
 ```
 
-По умолчанию используется `http://localhost:3000/api`
+## Pages
 
-### 3. Запустите dev сервер
+| Route | Description |
+|-------|-------------|
+| `/` | Dashboard with stats, mode switcher, events |
+| `/dns` | DNS resolver with raw + target URL modes |
+| `/mitigation` | Mitigation policy manager |
+| `/events` | Filterable event log with JSON payloads |
+| `/report` | Session report with charts + JSON export |
+| `/demo` | Automated simulation runner |
+| `/health` | Backend health check |
 
-```bash
-npm run dev
-```
+## API Integration
 
-Откроется на `http://localhost:5173`
+All backend endpoints are covered:
 
-## 🏗️ Структура проекта
-
-```
-frontend/
-├── src/
-│   ├── components/
-│   │   ├── Dashboard/          # Главная панель
-│   │   │   ├── Dashboard.tsx
-│   │   │   ├── NetworkGraph.tsx       # 3D визуализация
-│   │   │   ├── MetricsPanel.tsx       # Метрики
-│   │   │   └── LiveTrafficMonitor.tsx # Живой трафик
-│   │   ├── SimulationLab/      # Лаборатория симуляций
-│   │   │   ├── SimulationLab.tsx
-│   │   │   ├── AttackConfigurator.tsx # Настройка атаки
-│   │   │   └── SimulationVisualizer.tsx # Визуализация
-│   │   ├── MitigationCenter/   # Центр защиты
-│   │   │   ├── MitigationCenter.tsx
-│   │   │   ├── DNSSECValidator.tsx    # DNSSEC валидация
-│   │   │   └── FirewallRules.tsx      # Правила фаервола
-│   │   └── Analytics/          # Аналитика
-│   │       ├── Analytics.tsx
-│   │       ├── AttackCharts.tsx       # Графики
-│   │       └── SecurityReports.tsx    # Отчеты
-│   ├── services/
-│   │   └── api.ts              # API клиент
-│   ├── types/
-│   │   └── index.ts            # TypeScript типы
-│   ├── App.tsx                 # Главный компонент
-│   ├── main.tsx                # Точка входа
-│   └── index.css               # Глобальные стили
-├── public/
-├── index.html
-├── package.json
-├── vite.config.ts
-├── tailwind.config.js
-└── tsconfig.json
-```
-
-## 🎯 Основные функции
-
-### 1. Dashboard
-- **3D визуализация сети** с анимированными пакетами
-- **Real-time метрики**: запросы, атаки, блокировки
-- **Живой монитор DNS трафика**
-
-### 2. Simulation Lab
-- **Настройка атаки**: тип, цель, интенсивность
-- **Визуализация процесса атаки** в реальном времени
-- **Метрики эффективности**: успешность, блокировки
-
-### 3. Mitigation Center
-- **DNSSEC Validator**: включение/отключение криптографической защиты
-- **Firewall Rules**: управление IP белыми/черными списками
-- **Real-time статус защиты**
-
-### 4. Analytics
-- **Графики атак** за последние 7 дней
-- **Распределение типов атак** (круговая диаграмма)
-- **Статистика успешности** защиты
-- **Экспорт отчетов** в PDF/CSV
-
-## 🎨 Дизайн система
-
-### Цветовая палитра (Киберпанк тема)
-
-```css
---cyber-dark: #0a0e27      /* Фон */
---cyber-darker: #050816    /* Темный фон */
---cyber-blue: #00d9ff      /* Основной акцент */
---cyber-purple: #b537f2    /* Вторичный акцент */
---cyber-pink: #ff2e97      /* Опасность */
---cyber-green: #00ff88     /* Успех */
-```
-
-### Эффекты
-
-- **Glassmorphism** - прозрачные панели с размытием
-- **Glow effects** - свечение элементов
-- **Smooth animations** - плавные переходы
-- **Particle effects** - анимированные частицы
-
-## 🔌 API интеграция
-
-Frontend подключается к Backend через:
-
-### REST API
-```typescript
-// src/services/api.ts
-const API_BASE_URL = 'http://localhost:3000/api';
-
-// Примеры использования:
-await simulationAPI.start(config);
-await mitigationAPI.getConfig();
-await analyticsAPI.getStatistics(7);
-```
-
-### WebSocket
-```typescript
-// Real-time обновления
-socket.on('simulationUpdate', (data) => {
-  // Обновление UI
-});
-
-socket.on('dnsQuery', (query) => {
-  // Новый DNS запрос
-});
-```
-
-## 📱 Адаптивность
-
-Приложение полностью адаптивно для:
-- 🖥️ Desktop (1920px+)
-- 💻 Laptop (1280px+)
-- 📱 Tablet (768px+)
-- 📱 Mobile (320px+)
-
-## 🛠️ Команды разработки
-
-```bash
-# Development сервер с hot-reload
-npm run dev
-
-# Production сборка
-npm run build
-
-# Preview production сборки
-npm run preview
-
-# Линтинг
-npm run lint
-```
-
-## 🧪 Тестирование компонентов
-
-### Проверка Dashboard
-1. Откройте `http://localhost:5173`
-2. Проверьте 3D визуализацию сети
-3. Убедитесь, что метрики обновляются
-
-### Проверка Simulation Lab
-1. Перейдите на вкладку "Simulation Lab"
-2. Настройте параметры атаки
-3. Нажмите "Launch Attack"
-4. Наблюдайте визуализацию в реальном времени
-
-### Проверка Mitigation Center
-1. Перейдите на вкладку "Mitigation Center"
-2. Включите/выключите DNSSEC
-3. Добавьте правила firewall
-4. Проверьте сохранение настроек
-
-### Проверка Analytics
-1. Перейдите на вкладку "Analytics"
-2. Проверьте графики атак
-3. Экспортируйте отчет в CSV
-
-## 🎭 Демо режим
-
-Если backend не запущен, frontend использует:
-- **Mock данные** для демонстрации
-- **Симулированные обновления** метрик
-- **Фейковые события** атак
-
-## 🚀 Production сборка
-
-```bash
-# Соберите приложение
-npm run build
-
-# Результат в папке dist/
-# Деплой на любой статический хостинг:
-# - Vercel
-# - Netlify
-# - GitHub Pages
-# - AWS S3
-```
-
-## ⚠️ Troubleshooting
-
-### Проблема: 3D визуализация не работает
-
-**Решение:** Проверьте, что WebGL поддерживается браузером:
-```javascript
-const canvas = document.createElement('canvas');
-const gl = canvas.getContext('webgl');
-console.log(gl ? 'WebGL работает' : 'WebGL не поддерживается');
-```
-
-### Проблема: API запросы не проходят
-
-**Решение:**
-1. Проверьте, что backend запущен на `http://localhost:3000`
-2. Проверьте CORS настройки в backend
-3. Откройте DevTools → Network для проверки запросов
-
-### Проблема: Hot-reload не работает
-
-**Решение:**
-```bash
-# Остановите сервер
-# Удалите node_modules и lock файлы
-rm -rf node_modules package-lock.json
-
-# Переустановите
-npm install
-
-# Запустите снова
-npm run dev
-```
-
-## 🎓 Для дипломной работы
-
-### Презентация функционала
-
-1. **Демо Dashboard** - покажите real-time метрики
-2. **Запустите атаку** - продемонстрируйте симуляцию
-3. **Покажите защиту** - включите DNSSEC и firewall
-4. **Аналитика** - экспортируйте отчет
-
-### Ключевые особенности для защиты
-
-- ✅ Современный tech stack (React, TypeScript, Vite)
-- ✅ 3D визуализация (Three.js)
-- ✅ Real-time обновления (WebSocket)
-- ✅ Полностью типизированный код
-- ✅ Адаптивный дизайн
-- ✅ Production-ready код
+- `POST /sessions` · `GET /sessions/current` · `POST /sessions/:id/end`
+- `GET /sessions/:id/summary`
+- `POST /lab/:id/mode` · `POST /lab/:id/reset` · `GET /lab/:id/status`
+- `POST /lab/:id/bootstrap` · `POST /lab/:id/quick-demo`
+- `GET /dns/resolve` · `GET /dns/target-url`
+- `GET /mitigation/:id/policies` · `PUT /mitigation/:id/policies`
+- `GET /events`
+- `GET /report/:id`
+- `POST /demo/run`
+- `GET /health`

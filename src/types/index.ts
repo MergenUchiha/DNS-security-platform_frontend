@@ -1,119 +1,125 @@
-// DNS Traffic Types
-export interface DNSQuery {
+export type LabMode = 'SAFE' | 'ATTACK' | 'MITIGATED';
+export type EventType =
+  | 'SESSION_STARTED' | 'SESSION_ENDED'
+  | 'DNS_QUERY' | 'DNS_RESPONSE'
+  | 'MODE_CHANGED' | 'LAB_RESET'
+  | 'MITIGATION_POLICY_UPSERTED' | 'MITIGATION_ENABLED' | 'MITIGATION_DISABLED'
+  | 'SPOOF_DETECTED' | 'SPOOF_BLOCKED' | 'SAFE_RESOLUTION_FORCED'
+  | 'ERROR';
+
+export type FinalAction = 'PASS' | 'BLOCK' | 'FORCE_SAFE_IP';
+
+export interface LabSession {
   id: string;
-  simulationId?: string | null; // null = Real traffic, UUID = Simulation
-  timestamp: number;
+  createdAt: string;
+  endedAt: string | null;
+  mode: LabMode;
+}
+
+export interface Event {
+  id: string;
+  ts: string;
+  type: EventType;
+  severity: 'INFO' | 'WARN' | 'ALERT';
+  payload: Record<string, unknown> | null;
+  sessionId: string;
+}
+
+export interface MitigationPolicy {
+  id: string;
   domain: string;
-  queryType: 'A' | 'AAAA' | 'MX' | 'TXT' | 'NS';
-  sourceIP: string;
-  status: 'pending' | 'resolved' | 'spoofed' | 'blocked';
-  responseIP?: string;
-  responseTime?: number; // milliseconds
-  isSpoofed: boolean;
+  action: 'BLOCK' | 'FORCE_SAFE_IP';
+  allowedIps: string[];
+  sessionId: string;
 }
 
-// Attack Types
-export type AttackType = 
-  | 'dns_cache_poisoning'
-  | 'man_in_the_middle' 
-  | 'local_dns_hijack'
-  | 'rogue_dns_server';
-
-export interface AttackConfig {
-  type: AttackType;
-  targetDomain: string;
-  spoofedIP: string;
-  intensity: 'low' | 'medium' | 'high';
-  duration: number; // seconds
-}
-
-export interface SimulationResult {
+export interface DnsQuery {
   id: string;
-  attackType?: AttackType;
-  targetDomain?: string;
-  spoofedIP?: string;
-  intensity?: string;
-  duration?: number;
-  totalQueries?: number;
-  spoofedQueries?: number;
-  blockedQueries?: number;
-  successRate?: number;
-  config?: AttackConfig;
-  startTime: number | string;
-  endTime?: number | string | null;
-  status: 'running' | 'completed' | 'stopped';
-  metrics?: {
+  ts: string;
+  name: string;
+  qtype: string;
+  resolver: 'LEGIT' | 'SPOOF';
+  answer: string | null;
+  ttl: number | null;
+  rttMs: number | null;
+  finalAnswer: string | null;
+  finalAction: FinalAction | null;
+  sessionId: string;
+}
+
+export interface ResolveResult {
+  sessionId: string;
+  mode: LabMode;
+  resolver: 'LEGIT' | 'SPOOF';
+  name: string;
+  type: string;
+  answer: string | null;
+  ttl: number | null;
+  rttMs: number | null;
+  finalAction: FinalAction;
+  finalAnswer: string | null;
+  alert: { reason: string; forcedIp?: string } | null;
+}
+
+export interface TargetUrlResult extends ResolveResult {
+  targetUrl: string | null;
+  mapping: { matched: boolean; by?: string; note?: string };
+  reason?: string;
+}
+
+export interface LabStatus {
+  session: LabSession;
+  domain: string;
+  policies: MitigationPolicy[];
+  lastQuery: DnsQuery | null;
+  stats: {
+    queriesCount: number;
+    spoofDetected: number;
+    spoofBlocked: number;
+    safeResolutionForced: number;
+  };
+  events: Event[];
+  links: {
+    docs: string;
+    legitSite: string;
+    fakeSite: string;
+  };
+}
+
+export interface SessionSummary {
+  session: LabSession;
+  stats: {
+    queriesCount: number;
+    spoofDetected: number;
+    spoofBlocked: number;
+    safeResolutionForced: number;
+  };
+  events: Event[];
+}
+
+export interface Report {
+  session: LabSession;
+  summary: {
     totalQueries: number;
-    spoofedQueries: number;
-    blockedQueries: number;
-    successRate: number;
+    spoofDetected: number;
+    spoofBlocked: number;
+    safeResolutionForced: number;
   };
-  timeline?: TimelineEvent[];
-  queries?: DNSQuery[];
-  events?: any[];
+  domains: { name: string; samples: unknown[] }[];
+  events: Event[];
 }
 
-export interface TimelineEvent {
-  timestamp: number;
-  type: 'query' | 'spoofed' | 'blocked' | 'resolved';
-  description: string;
-  severity: 'info' | 'warning' | 'danger' | 'success';
-}
-
-// Mitigation Types
-export interface MitigationConfig {
-  dnssecEnabled: boolean;
-  firewallEnabled: boolean;
-  ratelimiting: {
-    enabled: boolean;
-    maxQueriesPerSecond: number;
+export interface DemoResult {
+  sessionId: string;
+  domain: string;
+  steps: {
+    safe: TargetUrlResult;
+    attack: TargetUrlResult;
+    mitigated: TargetUrlResult;
   };
-  ipWhitelist: string[];
-  ipBlacklist: string[];
-  trustedResolvers: string[];
+  hint?: {
+    legitSite: string;
+    fakeSite: string;
+    docs: string;
+  };
 }
-
-export interface SecurityMetrics {
-  threatsDetected: number;
-  threatsBlocked: number;
-  dnssecValidations: number;
-  avgResponseTime: number;
-  uptime: number;
-  totalQueries: number;
-  maliciousQueries: number;
-  legitimateQueries: number;
-}
-
-// Analytics Types
-export interface AttackStatistics {
-  date: string;
-  total: number;
-  blocked: number;
-  successful: number;
-  attackTypes: Record<AttackType, number>;
-}
-
-export interface VulnerabilityScore {
-  overall: number;
-  dnssec: number;
-  firewall: number;
-  monitoring: number;
-  configuration: number;
-}
-
-// Hybrid Mode Types
-export interface DNSMonitorStatus {
-  isMonitoring: boolean;
-  monitoredDomains: string[];
-  domainsCount: number;
-}
-
-export interface DNSMonitorStats {
-  totalQueries: number;
-  avgResponseTime: number;
-  spoofedQueries: number;
-  blockedQueries: number;
-  blockRate: number;
-}
-
-export type TrafficMode = 'simulation' | 'real' | 'both';
