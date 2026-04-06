@@ -57,7 +57,7 @@ export function Navbar() {
             }}
           >
             <img
-              src="./public/logo.jpeg"
+              src="/logo.jpeg"
               alt="Logo"
               className="w-full h-full object-cover"
             />
