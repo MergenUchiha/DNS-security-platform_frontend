@@ -9,7 +9,16 @@ const api = axios.create({
   timeout: 15000,
 });
 
-// Log errors in development
+// Attach JWT token to every request
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('dns-lab-token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Log errors + handle 401 (expired/invalid token)
 api.interceptors.response.use(
   r => r,
   err => {
@@ -17,6 +26,13 @@ api.interceptors.response.use(
     const status = err.response?.status ?? 'network';
     const data = err.response?.data;
     console.error(`[API] ${status} ${url}`, data);
+
+    if (status === 401 && !url.includes('/auth/')) {
+      localStorage.removeItem('dns-lab-token');
+      localStorage.removeItem('dns-lab-username');
+      window.location.reload();
+    }
+
     return Promise.reject(err);
   }
 );

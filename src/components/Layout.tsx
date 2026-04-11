@@ -10,10 +10,13 @@ import {
   FileText,
   Play,
   Wifi,
+  LogOut,
+  User,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLang } from "../contexts/LangContext";
+import { useAuth } from "../contexts/AuthContext";
 import { useSession } from "../contexts/SessionContext";
 import { ModeBadge } from "./ui";
 import type { Lang } from "../i18n/translations";
@@ -27,6 +30,7 @@ const LANGS: { code: Lang; label: string }[] = [
 export function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const { lang, setLang, t } = useLang();
+  const { username, logout } = useAuth();
   const { session } = useSession();
 
   const navItems = [
@@ -131,6 +135,23 @@ export function Navbar() {
           >
             {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
           </button>
+
+          {/* User + Logout */}
+          {username && (
+            <div className="flex items-center gap-2 ml-1 pl-2 border-l border-gray-700/50">
+              <span className="flex items-center gap-1.5 text-xs font-mono text-gray-400">
+                <User size={12} />
+                {username}
+              </span>
+              <button
+                onClick={logout}
+                className="p-1.5 rounded-md text-gray-500 hover:text-danger-400 hover:bg-danger-500/10 transition-all"
+                title={t.auth.logout}
+              >
+                <LogOut size={14} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

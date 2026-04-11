@@ -1,9 +1,9 @@
-FROM node:18-bullseye-slim AS build
+FROM oven/bun:1 AS build
 WORKDIR /app
-COPY package.json ./
-RUN npm install
+COPY package.json bun.lock* ./
+RUN bun install
 COPY . .
-RUN npm run build
+RUN bun run build
 
 FROM nginx:1.25-alpine AS runner
 COPY --from=build /app/dist /usr/share/nginx/html
